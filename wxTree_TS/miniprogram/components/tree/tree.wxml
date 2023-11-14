@@ -1,0 +1,5 @@
+<view class="main">
+  <block wx:for="{{treeList}}" wx:key="index">
+    <tree></tree>
+  </block>
+</view>

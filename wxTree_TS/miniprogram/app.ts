@@ -1,4 +1,7 @@
 // app.ts
+/**
+ * IAppOption接口用来约束参数列表的类型
+ */
 App<IAppOption>({
   globalData: {},
   onLaunch() {
