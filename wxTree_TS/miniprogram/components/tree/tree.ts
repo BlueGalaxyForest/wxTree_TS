@@ -5,7 +5,7 @@ Component({
    * 组件的属性列表
    */
   properties: {
-    treeList: { //具有指针关系的树形列表
+    listData: { //可以是初始的具有指针关系的列表,也可以是树形列表
       type: Array,
       value: []
     },
@@ -13,10 +13,14 @@ Component({
       type: Boolean,
       value: true
     },
+    isShowChildren: {  //控制树形的节点展开收缩(暂时)
+      type: Boolean,
+      value: false
+    },
     options: { //其他配置可选项
       type: Object,
       value: {
-
+        test: 111
       }
     }
   },

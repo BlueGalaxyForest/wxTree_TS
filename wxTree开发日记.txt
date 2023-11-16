@@ -13,3 +13,150 @@
 		类型系统无法正确推断类型或者你明确知道某一处代码不符合类型规范，可以使用 // @ts-ignore 注释来忽略 TypeScript 的类型检查，让编译器跳过该部分代码的类型检查。
 		
 	* 
+	
+	
+	
+# 引入treeUtil,并且能够将任意指针关系的对象数组转化为 tree (ok)
+## 大纲
+* 在tree下面创建class (ok)
+* 准备指针树列表(ok)
+* 设计array的接口:  => 感觉就是: let arr:string[object] = [{a:1,b:2},{c:1}]
+	const movieList = [
+	  {
+		movieId: 1,
+		typeName: '中国分区',
+		parentId: 1,
+		date:'2023-11-23',
+		area:'亚洲'
+	  },
+	  {
+		movieId: 2,
+		typeName: '日本分区',
+		parentId: 1,
+		date:'2023-11-25',
+		area:'亚洲'
+	  }]
+	  
+	const cityList = [
+	  {
+		cityId: 1,
+		cityTitle: '深圳',
+		fatherID: 1,
+		province:'广东',
+	  },
+	  {
+		cityId: 2,
+		cityTitle: '广州',
+		fatherID: 1,
+		province:'广东'
+	  }]  
+	  
+	  
+* 类型“object”不能作为索引类型使用的 TS错误:
+* 初步的转化树:
+	/*
+	  convertToTree(array: Array<{ [key: string]: any }>, name: string, id: string | number, fatherId: string | number) {
+
+			const result: Array<{ [key: string]: any }> = [];
+			const map: { [key: string]: any } = {};
+
+
+			array.forEach((item) => {
+			  item.title = item[name]
+			  map[item[id]] = {
+				...item
+			  };
+			});
+
+			array.forEach((item) => {
+			  const parent = map[item[fatherId]];
+			  if (parent) {
+				(parent.children || (parent.children = [])).push(map[item[id]]);
+			  } else {
+
+				result.push(map[item[id]]);
+			  }
+			});
+
+			return result;
+		  }
+		}
+	*/
+	
+* 需要利用接口改进:
+	/*
+	interface TreeNode { => 在 TypeScript 中，接口是类型的一种抽象描述，而不会生成具体的 JavaScript 代码。因此，接口的定义本身不需要导出，它在同一个项目内的任何文件中都是可见的，无需显式导入。
+	  [key: string]: any;
+	  title: string; // 假设 title 属性是每个节点都有的
+	  children?: TreeNode[]; // 子节点数组，可选的
+	}
+
+	function convertToTree(array: Array<TreeNode>, name: string, id: string | number, fatherId: string | number): TreeNode[] {
+	  const result: TreeNode[] = [];
+	  const map: { [key: string]: TreeNode } = {};
+
+	  array.forEach((item) => {
+		item.title = item[name];
+		map[item[id].toString()] = { // 将键转换为字符串，确保类型一致性
+		  ...item,
+		  children: [] // 初始化 children 数组
+		};
+	  });
+
+	  array.forEach((item) => {
+		const parent = map[item[fatherId]?.toString()]; // 使用可选链操作符确保不会出现 undefined
+		if (parent) {
+		  parent.children!.push(map[item[id].toString()]);
+		} else {
+		  result.push(map[item[id].toString()]);
+		}
+	  });
+
+	  return result;
+	}
+
+	
+	*/
+	
+* 先看看这颗树的转化效果如何=> 可以转化树
+	
+	
+*  convertToTree()代码的可行性,时间复杂度和空间复杂度分析:  =>O(n) + O(n)
+=> 最优化版本:
+	/*
+	  convertToTree(array: Array<any>, name: string, id: string | number, fatherId: string | number) {
+
+		const result: Array<{ [key: string]: any }> = [];
+		const map: { [key: string]: any } = {};
+
+		array.forEach((item) => {
+		  item.title = item[name]; // 把节点的中文值做一个统一处理
+		  item.id = item[id]; // 把节点的id做一个统一处理
+
+		  map[item[id]] = {
+			...item
+		  };
+
+		  const parent = map[item[fatherId]];
+		  if (parent) {
+			(parent.children || (parent.children = [])).push(map[item[id]]);
+		  } else {
+			result.push(map[item[id]]);
+		  }
+		});
+
+		return result;
+	  }
+	}
+
+*/
+
+
+# 根据转化的树做渲染
+## 大纲
+* 核心listData可以接收原始数组,也可以接收树形数组;需要这样设计,保证兼容性
+
+### 实现
+1. 完善tree,inside(ok)
+2. 把inside的点击节点展开先做了 => 先能够简单展示(ok)
+	* 首先来个 isShowChildren 属性来控制节点展开收缩(ok)

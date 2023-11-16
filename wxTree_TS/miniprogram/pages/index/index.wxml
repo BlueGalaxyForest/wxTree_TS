@@ -1,3 +1,15 @@
 <view class="main">
-  <tree></tree>
+  <tree listData="{{movieTree}}"></tree>
+  <view class="testBg">
+    测试背景
+  </view>
+
+  <view class="testBg2">
+    测试背景2
+  </view>
+
+
+  <view class="testText">
+    测试文字
+  </view>
 </view>
