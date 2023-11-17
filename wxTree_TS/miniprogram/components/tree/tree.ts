@@ -17,6 +17,10 @@ Component({
       type: Boolean,
       value: false
     },
+    keepAlive: { //保持节点的活跃度(true表示节点的展开状态将会被保留;false表示节点展开状态不会被保留)
+      type: Boolean,
+      value: true
+    },
     options: { //其他配置可选项
       type: Object,
       value: {
@@ -36,6 +40,8 @@ Component({
    * 组件的方法列表
    */
   methods: {
-
+    nodeClick(e: WechatMiniprogram.Touch) {
+      this.triggerEvent('nodeClick', e.detail)
+    }
   }
 })

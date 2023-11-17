@@ -1,6 +1,11 @@
 <view class="main">
-  <tree listData="{{movieTree}}"></tree>
-  <view class="testBg">
+
+  <view class="tree-box">
+    <wxTree listData="{{movieTree}}" bind:nodeClick="nodeClick"></wxTree>
+  </view>
+
+
+  <view class="testBg" style="margin-top: 30px;">
     测试背景
   </view>
 

@@ -1,5 +1,5 @@
 {
   "usingComponents": {
-    "tree":"../../components/tree/tree"
+    "wxTree":"../../components/tree/tree"
   }
 }

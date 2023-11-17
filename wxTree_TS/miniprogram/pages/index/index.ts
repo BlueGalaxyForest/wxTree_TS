@@ -13,7 +13,6 @@ Page({
   },
 
   onLoad() {
-    console.log('moveList==>', movieList)
     const movieTree: Array<TreeNode> = treeUtil.convertToTree(movieList, 'typeName', 'movieId', 'parentId')
     console.log('moveTree-->', movieTree)
     this.setData({
@@ -21,4 +20,12 @@ Page({
     })
   },
 
+  /**
+   * wxTree组件触发父页面钩子
+   * @param e 
+   */
+  nodeClick(e: WechatMiniprogram.Touch) {
+    const node = e.detail
+    console.log('选择的节点:', node)
+  }
 })

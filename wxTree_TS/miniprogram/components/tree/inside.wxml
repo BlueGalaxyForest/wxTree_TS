@@ -1,28 +1,33 @@
 <view class="treeList c{{step}}">
   <view class="line" style="margin-left:{{(step-1)*20}}px;"></view>
+  <view class="title" style="margin-left:{{(step-1)*20}}px;">
 
-  <view hidden="{{ true && listData.hidden}}" class="title" style="margin-left:{{(step-1)*20}}px;">
-
-
-    <view class="icon" wx:if="{{(listData.children.length>0 && isShowChildren )|| (listData.openChildren)}}" mark:item="{{listData}}" catchtap="toggleShowChildren">-</view>
+    <view class="icon" wx:if="{{listData.children.length>0 && isShowChildren }}" mark:item="{{listData}}" catchtap="toggleShowChildren">
+      -</view>
     <view class="icon" wx:elif="{{!listData.children}}">
       <view class="dot" style="background-color: {{options.dotBg}};"></view>
     </view>
     <view class="icon" wx:else mark:item='{{listData}}' catchtap="toggleShowChildren">+</view>
-    <view class="text {{listData.isClick?'click-active':''}}  {{listData.isActive?'active':''}}" bind:tap="cellClick" mark:item='{{listData}}'>{{listData.title}}</view>
 
-
+    <view class="text {{listData.isClick?'click-active':''}}  {{listData.isActive?'active':''}}" bind:tap="nodeClick" mark:item='{{listData}}'>{{listData.title}}</view>
   </view>
 
 
-  <!-- 如果node本身有openChildren(=true)属性,也可以默认打开孩子遍历 -->
-  <block wx:if="{{listData.openChildren&&isShowChildren==false}}" wx:for="{{listData.children}}" wx:key="index">
-    <tree listData="{{item}}" options="{{options}}" step="{{step+1}}" bindtreeListEvent="treeListEvent" bind:cellClick='cellClick'></tree>
+
+
+
+
+  <block wx:if="{{keepAlive}}">
+    <view hidden="{{isShowChildren===false || listData.children.length<=0}}" wx:for="{{listData.children}}" wx:key="index">
+      <tree listData="{{item}}" options="{{options}}" keepAlive="{{keepAlive}}" step="{{step+1}}" bind:nodeClick='nodeClick'></tree>
+    </view>
   </block>
 
-  <!-- 全局展开孩子 -->
-  <block wx:if="{{listData.children.length>0&&isShowChildren}}" wx:for="{{listData.children}}" wx:key="index">
-    <tree listData="{{item}}" options="{{options}}" step="{{step+1}}" bindtreeListEvent="treeListEvent" bind:cellClick='cellClick'></tree>
+  <block wx:else>
+    <view wx:if="{{listData.children.length>0&&isShowChildren}}" wx:for="{{listData.children}}" wx:key="index">
+      <tree listData="{{item}}" options="{{options}}" keepAlive="{{keepAlive}}" step="{{step+1}}" bind:nodeClick='nodeClick'></tree>
+    </view>
   </block>
+
 
 </view>

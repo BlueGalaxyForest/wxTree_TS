@@ -21,6 +21,10 @@ Component({
       type: Number,
       value: 1
     },
+    keepAlive: { //保持节点的活跃度(true表示节点的展开状态将会被保留;false表示节点展开状态不会被保留)
+      type: Boolean,
+      value: true
+    },
     options: { //其他配置可选项
       type: Object,
       value: {
@@ -40,45 +44,37 @@ Component({
    * 组件的方法列表
    */
   methods: {
-    // 切换 显示子项
-    toggleShowChildren(e) {
-      // console.log('toggleShowChildren()=>', e.mark.item, 'listData==>', this.data.listData)
-      const node = e.mark.item
-      if (node.hasOwnProperty('openChildren')) {
-        this.setData({
-          'listData.openChildren': !node.openChildren
-        })
-        return
-      }
+    /**
+     * 点击+,-的触发事件
+     * @param e 
+     */
+    toggleShowChildren<T>(e: WxTree.TouchEventWithMark<T>) {
+
       this.setData({
         isShowChildren: !this.data.isShowChildren
       })
-      if (node.children) {
-        node.children.forEach(item => {
-          item.hidden = false
-        })
-        this.setData({
-          listData: node
-        })
-      }
+
     },
-    cellClick(e) {
-      let node = ''
+    /**
+     * 点击节点标题的触发事件
+     * @param e 
+     */
+    nodeClick(e: WechatMiniprogram.Touch): void {
+      let node: Record<string, any>
       const flatExpand = this.data.flatExpand
 
-      if (e.type == 'tap') {
-        this.triggerEvent('cellClick', e.mark.item)
-        // console.log('e.type==tap->', this.data.listData)
-        node = e.mark.item
+      if (e.type === 'tap') {
+        this.triggerEvent('nodeClick', e.mark?.item)
+        node = e.mark?.item
+
       } else {
-        this.triggerEvent('cellClick', e.detail)
-        // console.log('e.type==cellClick->', this.data.listData)
+        this.triggerEvent('nodeClick', e.detail)
         node = e.detail
+
       }
 
-      // console.log('cellClick()=====>', e.type, e.mark.item, e.detail, flatExpand, node)
 
-      if (e.type == 'tap' && flatExpand && node.children && node.children.length) {
+      if (e.type === 'tap' && flatExpand && node.children && node.children.length) {
         this.toggleShowChildren({
           mark: {
             item: node
