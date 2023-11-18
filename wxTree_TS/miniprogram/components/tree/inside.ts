@@ -5,7 +5,7 @@ Component({
    * 组件的属性列表
    */
   properties: {
-    listData: { //可以是初始的具有指针关系的列表,也可以是树形列表
+    treeItem: { //可以是初始的具有指针关系的列表,也可以是树形列表
       type: Object,
       value: {}
     },
@@ -37,9 +37,17 @@ Component({
    * 组件的初始数据
    */
   data: {
-
+    title: '',//是节点的文本名字
+    children: '' //孩子的文本名字
   },
-
+  lifetimes: {
+    attached() {
+      this.setData({
+        title: this.data.options.treeObjProps.title,
+        children: this.data.options.treeObjProps.children
+      })
+    }
+  },
   /**
    * 组件的方法列表
    */
@@ -64,17 +72,17 @@ Component({
       const flatExpand = this.data.flatExpand
 
       if (e.type === 'tap') {
-        this.triggerEvent('nodeClick', e.mark?.item)
         node = e.mark?.item
+        this.triggerEvent('nodeClick', e.mark?.item)
 
       } else {
-        this.triggerEvent('nodeClick', e.detail)
         node = e.detail
+        this.triggerEvent('nodeClick', e.detail)
 
       }
 
 
-      if (e.type === 'tap' && flatExpand && node.children && node.children.length) {
+      if (e.type === 'tap' && flatExpand && node[this.data.children] && node[this.data.children].length) {
         this.toggleShowChildren({
           mark: {
             item: node

@@ -198,11 +198,99 @@
 	-> 如果想要保留节点状态,使用hidden => 可以做个状态标记控制 => keepAlive去控制(ok)
 	
 	
-# 先发布一个gitHub版本
+# 先发布一个gitHub版本 (OK)
 ## 大纲:
 * 目前的基本功能:
 	1. 可以展示最基本展示树了
 	2. 可以得到点击的节点信息了
 	3. 并且具备是否保留点击节点状态的选项
 	
-* 	
+
+# 做一个点击印记功能:(OK)
+## 大纲
+* 点击印记需要排他思想
+* 点击了某个节点,需要把当前的祖先全部找到
+* 把点击的节点和rootTree拿到,然后做一个Tree遍历,然后设置一个新属性isClick
+
+### 实现
+1. 首先需要知道rootTree是不是引用传递 => 设置那个isClick:true属性没有发生引用传递(OK)
+	1. nodeClick函数增加一个新属性,isClick试试 => 导出去的node节点有isClick:true的属性,但是在rootTree没有发生改变
+	
+2. 需要拿到当前节点和rootTree去取travel设置:
+	* 需要有一个options来帮助,例如idStr这些标识符号
+	* 我需要传一个treeOptions对象:
+	    treeOptions: {
+		  dotBg: '#666666',
+		  recordTrack: true, //是否开启点击轨迹记录
+		  searchBg: '#00DDAA' //搜索匹配的背景颜色
+		}
+		=> treeOptions去设置接口
+		
+	* 但是现在有个问题,印记需要用到每个对象的唯一标识符
+	=> 如果单独传个对象标识符,那么整棵树是否被限制?
+	
+3. 现在我们这个listData需要拦截了
+	* 现在可以直接把list给tree组件,但是observes监听到了listData就要去验证,需要配合treeOptions
+	1. 现在我直接把movieList给WxTree=> 展示了,但是都是父亲
+	2. 我需要写一个验证器 Verify(OK)
+	3. treeOptions需要有 isTreeConstruct //是否已经是树结构 (OK)
+	4. 准备一颗TreeOptions配置(OK)
+	5. 如果不是树,肯定要读取相关标识符号,相关treeOptions需要写一份默认的,因为我默认是children和title:(OK)
+		  interface TreeOptions {
+			[key: string]: any;
+			isTreeConstruct?: boolean,  //给定的数组是否已经就是属性结构,默认:false
+			dotBg?: string  //原点的背景色,#ffffff等十六进制颜色,默认:#808080
+			searchBg?: string //搜索状态下,如果搜索成功了,匹配的节点的背景色(#ffffff等十六进制颜色)
+			recordTrack?: boolean //是否开启点击印记,true表示开启;默认:false
+			treeObjProps: {
+			  id:string
+			  title: string,  //树形UI用于展示的文本
+			  fatherId: string, //树的指针,如{name:'文本标题',parentId:2,child:[....]},fatherId在此时取'parentId'
+			  children: string //树孩子的名称,例如上行例子,取'child'
+			}
+		  }
+		  
+	6. 在Verify.ts需要导入convertToTree(OK)
+		* 就是这个id和title和children都要传入的参数来(OK)
+		* 那么需要TS函数重载
+	7. 那么子组件的渲染的数据就要treeList而不是listData(OK)
+	8. 那么inside组件的命名是否要有讲究呢?=> 因为现在是遍历treeList,并且把treeList的每一个item传给子组件了,那么listData->treeItem(OK)
+	9. 那么inside之前用的title和children,是不是依赖 treeOptions.treeObjProps.title 
+	10. 如果传入的listData本身就是一颗树
+		* 那么fatherId也不是必须的啊=> 传空就行(OK)
+		* 原生树直接返回就好了(OK)
+		@ 转化树的name是不是多余啊
+		
+4. 现在开始思考下点击印记如何设计:(OK)
+	* 点击印记应该在树里面开启
+	* 可以在顶层拿到当前点击的节点和rootTree,那么应该在rootTree里面进行一个排他思想:
+	/*
+	  traverseTree(tree, clickedNode, idStr) {
+		for (const node of tree) {
+ 
+		  if (node[idStr] == clickedNode[idStr]) {
+			node.isClick = true
+		  } else {
+			node.isClick = false
+		  }
+
+		  if (node.children && node.children.length > 0) {
+			this.traverseTree(node.children, clickedNode, idStr);
+		  }
+		}
+	  }
+	*/
+	* 需要考虑下方法的时间复杂度和空间复杂度 => 对于小规模树可行,对于大规模树,效率极差
+	
+	* rootTree可以拷贝一份做副本=>setData({treeList}) => 可以来个treeListOrigin(对treeList的一份拷贝)
+	* 还是travelTree,只不过我找到这棵树,node的isClick设为true,然后立马return travel
+	* 当我第二次点击的时候,我是不是就拿treeListOrigin,这样我找到你,就直接return
+	
+	
+# 做一个点击印记的颜色以及原点颜色可配置的功能
+## 大纲
+* 首先配置圆点颜色(OK)
+* 点击的印记背景色的配置
+	=> 暂时的实现方式可能是比较冗余::
+		    <view class="text {{treeItem.isClick?'click-active':''}} " 
+			style="background-color:{{treeItem.isClick?options.clickBg:''}}" bind:tap="nodeClick" mark:item='{{treeItem}}'>{{treeItem[title]}}</view>

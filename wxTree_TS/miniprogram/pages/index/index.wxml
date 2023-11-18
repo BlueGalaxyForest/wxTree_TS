@@ -1,7 +1,8 @@
 <view class="main">
 
   <view class="tree-box">
-    <wxTree listData="{{movieTree}}" bind:nodeClick="nodeClick"></wxTree>
+    <!-- <wxTree listData="{{movieList}}" options="{{treeOptions}}" bind:nodeClick="nodeClick"></wxTree> -->
+    <wxTree listData="{{cityTree}}" options="{{treeOptions2}}" bind:nodeClick="nodeClick"></wxTree>
   </view>
 
 
