@@ -19,7 +19,7 @@ class Verify {
     this.options = options
     this.treeObjProps = options.treeObjProps
 
-    console.log('Verify->Constructor->options::', this.options)
+  
   }
   /**
    * 验证传入的list是怎样的结构;

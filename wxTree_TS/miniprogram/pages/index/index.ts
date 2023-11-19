@@ -15,6 +15,9 @@ Page({
     /**如果给定列表不是树,参考这个选项 */
     treeOptions: {
       isTreeConstruct: false, //不是树结构
+      recordTrack: true, //记录点击印记
+      searchMode: true, //开启搜索模式
+      // searchInputCss: "--border-color:#DDDDDD;--border-radius:5px;--background-color:#33FFFF;--padding:5px 5px",//输入框的样式设置
       treeObjProps: {
         id: 'movieId',
         title: 'typeName',
@@ -27,7 +30,7 @@ Page({
     treeOptions2: {
       isTreeConstruct: true, //是树结构
       recordTrack: true, //记录点击印记
-      dotBg:"#33CCFF", 
+      dotBg: "#33CCFF",
       // clickBg:"#99FF33", 
       treeObjProps: {
         id: 'cityId',
@@ -39,7 +42,6 @@ Page({
   },
 
   onLoad() {
-    console.log('cityTree:', cityTree)
     this.setData({
       movieList, cityTree
     })

@@ -1,6 +1,9 @@
 // components/tree/tree.ts
 import _Verify from './utils/Verify'
-import _TreeUtil from './utils/TreeUtil'
+import TreeUtil from './utils/TreeUtil'
+import {
+  debounce
+} from './utils/tools'
 
 Component({
 
@@ -43,7 +46,7 @@ Component({
 
   observers: {
     'listData': function (n: Array<WxTree.TreeNode>) {
-      console.log('listData的监听::', n)
+     
       if (n.length) {
         const Verify = new _Verify(this.data.options as WxTree.TreeOptions)
         const treeList: WxTree.TreeNode = Verify.listData(n)
@@ -69,22 +72,40 @@ Component({
    */
   methods: {
     nodeClick(e: WechatMiniprogram.Touch) {
-      console.log('rootTree=>', this.data.listData)
+     
       this.triggerEvent('nodeClick', e.detail)
       if (this.data.options.recordTrack) { //开启点击印记功能
-        const treeUtil = new _TreeUtil()
+        const treeUtil = new TreeUtil()
         const treeListCopy: Array<WxTree.TreeNode> = JSON.parse(JSON.stringify(this.data.treeListOrigin))
         const clickedNode: WxTree.TreeNode = e.detail
         const idStr = this.data.options.treeObjProps.id
         const childrenStr = this.data.options.treeObjProps.children || 'children' //因为childrenStr在非树列表情况下是可选的
         treeUtil.clickNodeTravel(treeListCopy, clickedNode, idStr, childrenStr)
 
-        console.log('点击印记后的treeListCopy::', treeListCopy)
+        
         this.setData({
           treeList: treeListCopy
         })
 
       }
-    }
+    },
+
+    /**
+     * 搜索模式的绑定
+     * @param e 
+     */
+    onInput: debounce(async function (this: WechatMiniprogram.Component.TrivialInstance, e: WechatMiniprogram.Input) {
+
+      const inputValue: string = e.detail.value.trim()
+      const idStr = this.data.options.treeObjProps.id  //对象的唯一标识
+      const titleStr = this.data.options.treeObjProps.title  //对象文本的标识
+      const childrenStr = this.data.options.treeObjProps.children || 'children' //children标识,|| 'children' 的原因是在list非树情况下是,这个字段是非必须得,如果不传,默认是'children'
+      const treeListOriginCopy = JSON.parse(JSON.stringify(this.data.treeListOrigin))
+      const treeUtil = new TreeUtil()
+      treeUtil.searchNodeFromTree(inputValue, idStr,titleStr,childrenStr, treeListOriginCopy)
+
+    })
+
+
   }
 })

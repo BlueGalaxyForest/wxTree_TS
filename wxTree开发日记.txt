@@ -294,3 +294,169 @@
 	=> 暂时的实现方式可能是比较冗余::
 		    <view class="text {{treeItem.isClick?'click-active':''}} " 
 			style="background-color:{{treeItem.isClick?options.clickBg:''}}" bind:tap="nodeClick" mark:item='{{treeItem}}'>{{treeItem[title]}}</view>
+			
+			
+# 现在要做个搜索节点功能
+## 大纲
+* vant的原生微信小程序组件,也用到了setData:
+	        reset: function () {
+            this.setData({ currentDate: this.getInitialDate(this.data.defaultDate) });
+            this.scrollIntoView();
+        },
+		
+* 这个搜索框应该内嵌在组件里面
+* 通过改变组件里面的treeList来控制树的显示
+* 需要准备一个搜索的方法
+* 但是搜索的颜色激活是否会与recordTrack:true的情况背景色冲突?
+	1. 搜索深圳,得到的是一个node节点,这个node节点应该被放入一个results数组
+	2. 并且我搜索的时候,应该传入的是当前的treeList
+	3. treeList是有副作用属性,例如在recordTrack:true模式,节点可能会有isClick:true的键值对属性
+	4. 需要明白wx:for在数据变化的时候,会重新销毁再渲染组件么?如果组件没有销毁,那么组件的isShowChildren这个数据可能会影响搜索的节点展开
+		=> 在使用 wx:for 渲染列表时，小程序框架会尽量优化性能，复用组件实例，并且会调用合适的生命周期钩子函数。
+		
+	5. 如果我的搜索的时候,传的不是treeList的拷贝,而是treeListOrigin的拷贝,那么纯净的树就不会有副作用,但是isClick:true消失不见会导致之前的点击印记也没了
+	6. 如果说这时再搜索`深圳`,你得到一个节点,然后再渲染这个搜索结果节点:如果你再点击节点,在recordTrack:true的情况下,由于之前考虑的是效率用的是treeListOrigin
+	传入TravelTree方法(会提前return节省搜索次数) => 节点突然又变大了,并且没有搜索印记了
+	
+	7. 所以在开启点击印记的时候,遍历的话,需要看看当前treeOptions有没有事搜索模式,searchMode:true
+	=> searchMode:true,首先会导致搜索框出现
+	=> 其次在recordTrack为true的情况下,我需要判断searchMode是否为true,
+		if searchMode也为true,我需要复用原来的treeList的拷贝(会保留印记),并且我的TravelTree的策略改为全局Travel,就是不满足的会增加isClick为false的键值属性对
+		else 就是采用原来的Travel方式会提前return
+		
+	8. 如果search输入框为null,就传入原来的treeListOrigin的拷贝
+	
+### 实现
+1. 准备一个输入框内嵌
+	* 输入框涉及到样式,那么这个样式能否采取var的形式呢?
+	* 之前的经验:
+		1. 页面数据有个skins字符串:
+		'--color:#2797ff;--color3:#1890ff;--color2:#91d5ff;--bg-my:url(http://kot33.net:3000/1/iconfile/raw/branch/main/images/themep/bg_2.png);--bg-index:url(http://kot33.net:3000/1/iconfile/raw/branch/main/images/themep/index2.png);\n  
+		--bg-login:url(http://kot33.net:3000/1/iconfile/raw/branch/main/images/themep/login2.png)\n  '
+		2. 其次的话在wxml顶层设计 style="{{skins}}"
+		
+	* vant-button的做法
+		1. 组件的style:
+		<button
+		  id="{{ id || buttonId }}"
+		  data-detail="{{ dataset }}"
+		  class="custom-class {{ utils.bem('button', [type, size, { block, round, plain, square, loading, disabled, hairline, unclickable: disabled || loading }]) }} {{ hairline ? 'van-hairline--surround' : '' }}"
+		  hover-class="{{ disabled || loading ? '' : 'van-button--active hover-class'}}"
+		  lang="{{ lang }}"
+		  form-type="{{ formType }}"
+		  style="{{ computed.rootStyle({ plain, color, customStyle }) }}"   => 这里可能就是字符串
+		  
+		2. wxss:
+			/*
+			 @import '../common/index.wxss';
+			.van-button--default {
+			  background: var(--button-default-background-color, #fff); => 如果该自定义属性未定义，则使用备用值 #fff。
+			  border: var(--button-border-width, 1px) solid var(--button-default-border-color, #ebedf0);
+			  color: var(--button-default-color, #323233)
+			}
+
+			.van-button--primary {
+			  background: var(--button-primary-background-color, #07c160);
+			  border: var(--button-border-width, 1px) solid var(--button-primary-border-color, #07c160);
+			  color: var(--button-primary-color, #fff)
+			}
+
+			.van-button--info {
+			  background: var(--button-info-background-color, #1989fa);
+			  border: var(--button-border-width, 1px) solid var(--button-info-border-color, #1989fa);
+			  color: var(--button-info-color, #fff)
+			}
+
+			.van-button--danger {
+			  background: var(--button-danger-background-color, #ee0a24);
+			  border: var(--button-border-width, 1px) solid var(--button-danger-border-color, #ee0a24);
+			  color: var(--button-danger-color, #fff)
+			}
+
+			.van-button--warning {
+			  background: var(--button-warning-background-color, #ff976a);
+			  border: var(--button-border-width, 1px) solid var(--button-warning-border-color, #ff976a);
+			  color: var(--button-warning-color, #fff)
+			}
+
+			.van-button--plain {
+			  background: var(--button-plain-background-color, #fff)
+			}
+
+			.van-button--plain.van-button--primary {
+			  color: var(--button-primary-background-color, #07c160)
+			}
+
+			.van-button--plain.van-button--info {
+			  color: var(--button-info-background-color, #1989fa)
+			}
+			*/
+	* 输入框的样式该如何设计?
+		1. 在treeOptions准备一个 searchInputCss
+		2. 如果要设置边框颜色可以 searchInputCss="--border-color:#DDDDDD;"
+		3. 如果要设置边框的圆角可以 searchInputCss="--border-color:#DDDDDD;--border-radius:5px"
+		4. 如果要设置背景框的颜色可以 searchInputCss="--border-color:#DDDDDD;--border-radius:5px;--background-color:#33FFFF"
+		5. 如果要设置边框的padding可以 searchInputCss="--border-color:#DDDDDD;--border-radius:5px;--background-color:#33FFFF;--padding:5px 5px" =>padding四个值： 分别应用于上、右、下、左四个方向的内边距
+		
+	* css的var的使用:
+		background: var(--button-default-background-color, #fff); => 如果该自定义属性未定义，则使用备用值 #fff。	
+		
+2. 先searchMode去控制输入框的显示与隐藏	(OK)
+3. 边框样式的自定义(OK)
+	1. 准备一个 searchInputCss(OK)
+	2. 去掉searchInputClass,让var有默认取值(OK)
+	
+4. 绑定搜索触发事件(OK)
+	* 搜索可能需要一个debounce函数来防抖:
+		/*
+		function debounce(fn, interval) {
+		  var timer;
+		  var gapTime = interval || 1000; //间隔时间，如果interval不传，则默认1000ms
+		  return function () {
+			clearTimeout(timer);
+			var context = this;
+			var args = arguments; //保存此处的arguments，因为setTimeout是全局的，arguments不是防抖函数需要的。
+			timer = setTimeout(function () {
+			  fn.call(context, args);
+			}, gapTime);
+		  };
+		}
+		*/
+	* 
+	
+5. 搜索方法需要怎么设计?
+	* 首先还是要获得 treeList 和 treeListOrigin
+	* treeList负责内部属性变更, treeListOrigin负责在空串直接返回 => 但是似乎没必要传treeListOrigin?
+	* 似乎传treeList不太行,因为treeList本身是变化,导致第二次搜索不准确,因此还是要传treeListOrigin的拷贝
+	* 需要在TreeUtil去编写搜索逻辑
+	* 需要加个防抖设计:(OK)
+		/*
+		function debounce(fn, interval) {
+		  var timer;
+		  var gapTime = interval || 1000; //间隔时间，如果interval不传，则默认1000ms
+		  return function () {
+			clearTimeout(timer);
+			var context = this;
+			var args = arguments; //保存此处的arguments，因为setTimeout是全局的，arguments不是防抖函数需要的。
+			timer = setTimeout(function () {
+			  fn.call(context, args);
+			}, gapTime);
+		  };
+		}
+		*/
+		
+		使用:
+		 inputChange: debounce(async function (e) {})
+		
+		=> TS 对象的导出细节:
+ 
+		export const functions = {
+		  add: (a: number, b: number) => a + b,
+		  subtract: (a: number, b: number) => a - b,
+		};
+		这种导出,不能
+		import {add} from 'xxx'是吧?
+		而是只能 import {functions }是吗? => 对的，如果你导出的是一个包含多个函数的对象，那么在导入时，应该使用对象的名称。所以，如果你的导出是这样的：
+	* 还要传个titleStr啊
+	* 寻找祖先的方法设计:
+		=> 需要一个childrenStr 

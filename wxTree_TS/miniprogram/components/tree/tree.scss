@@ -1,1 +1,11 @@
 /* components/tree/tree.wxss */
+
+.input-box {
+  .input {
+    font-size: 28rpx;
+    border: 1px solid var(--border-color,#808080);
+    border-radius: var(--border-radius,3px);
+    background-color: var(--background-color,#fff);
+    padding: var(--padding,5px 5px);
+  }
+}
