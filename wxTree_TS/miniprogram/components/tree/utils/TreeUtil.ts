@@ -76,14 +76,13 @@ class TreeUtil {
       return originTree;
     }
     console.log(value, idStr, titleStr, childrenStr, originTree)
-
-    const results: Array<WxTree.TreeNode> = [] //最终搜索结果
+ 
     originTree.forEach(node => {
       node.hidden = true
-      this._searchNodeFromTree(node, value, idStr, titleStr, childrenStr, originTree, results)
+      this._searchNodeFromTree(node, value, idStr, titleStr, childrenStr, originTree)
     })
 
-    return results
+    return originTree
   }
 
   /**
@@ -94,45 +93,25 @@ class TreeUtil {
    * @param titleStr 
    * @param childrenStr 
    * @param originTree 
-   * @param results 
    */
-  _searchNodeFromTree(node: WxTree.TreeNode, value: string, idStr: string, titleStr: string, childrenStr: string, originTree: WxTree.TreeNode[], results: WxTree.TreeNode[]) {
+  _searchNodeFromTree(node: WxTree.TreeNode, value: string, idStr: string, titleStr: string, childrenStr: string, originTree: WxTree.TreeNode[]) {
   
     if (node[titleStr].includes(value)) {
-      node.isActive = true
+      node.isFound = true
       node.hidden = false
 
       const Ancestors = this.getAncestors(originTree, node, idStr, childrenStr)
       console.log('Ancestors-->', Ancestors)
-      if (Ancestors.length) {
-        const rootAncestor = Ancestors[0]
-        const index = results.findIndex(obj => obj[idStr] == rootAncestor[idStr])
-        if (index > -1) {
-          Ancestors.forEach(item => {
-            item.openChildren = true
-            item.hidden = false
-          })
-
-        } else {
-          Ancestors.forEach(item => {
-            item.openChildren = true
-            item.hidden = false
-          })
-          results.push(rootAncestor)
-        }
-      } else {
-        node.isActive = true
-        node.hidden = false
-
-        node.openChildren = true
-        results.push(node)
-      }
+      Ancestors.forEach((item)=>{
+        item.openChildren = true
+        item.hidden = false
+      })
     }
 
     if (node[childrenStr] && node[childrenStr].length) {
       node[childrenStr].forEach((child: WxTree.TreeNode) => {
         child.hidden = true
-        this._searchNodeFromTree(child, value, idStr, titleStr, childrenStr, originTree, results)
+        this._searchNodeFromTree(child, value, idStr, titleStr, childrenStr, originTree)
       })
     }
   }

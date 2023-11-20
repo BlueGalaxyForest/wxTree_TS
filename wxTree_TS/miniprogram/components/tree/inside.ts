@@ -57,11 +57,30 @@ Component({
      * @param e 
      */
     toggleShowChildren<T>(e: WxTree.TouchEventWithMark<T>) {
+      const node = e.mark?.item
+      console.log('toggleNode->',node)
+      if (node.hasOwnProperty('openChildren')) {
+        this.setData({
+          'treeItem.openChildren': !node.openChildren
+        })
+        return
+      }
 
       this.setData({
         isShowChildren: !this.data.isShowChildren
       })
 
+      /**
+       * 解除一些节点的隐藏状态
+       */
+      if (node.children) {
+        node.children.forEach((item: WxTree.TreeNode) => {
+          item.hidden = false
+        })
+        this.setData({
+          listData: node
+        })
+      }
     },
     /**
      * 点击节点标题的触发事件

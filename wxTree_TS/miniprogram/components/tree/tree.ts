@@ -46,7 +46,7 @@ Component({
 
   observers: {
     'listData': function (n: Array<WxTree.TreeNode>) {
-     
+
       if (n.length) {
         const Verify = new _Verify(this.data.options as WxTree.TreeOptions)
         const treeList: WxTree.TreeNode = Verify.listData(n)
@@ -72,7 +72,7 @@ Component({
    */
   methods: {
     nodeClick(e: WechatMiniprogram.Touch) {
-     
+
       this.triggerEvent('nodeClick', e.detail)
       if (this.data.options.recordTrack) { //开启点击印记功能
         const treeUtil = new TreeUtil()
@@ -82,7 +82,7 @@ Component({
         const childrenStr = this.data.options.treeObjProps.children || 'children' //因为childrenStr在非树列表情况下是可选的
         treeUtil.clickNodeTravel(treeListCopy, clickedNode, idStr, childrenStr)
 
-        
+
         this.setData({
           treeList: treeListCopy
         })
@@ -102,7 +102,11 @@ Component({
       const childrenStr = this.data.options.treeObjProps.children || 'children' //children标识,|| 'children' 的原因是在list非树情况下是,这个字段是非必须得,如果不传,默认是'children'
       const treeListOriginCopy = JSON.parse(JSON.stringify(this.data.treeListOrigin))
       const treeUtil = new TreeUtil()
-      treeUtil.searchNodeFromTree(inputValue, idStr,titleStr,childrenStr, treeListOriginCopy)
+      const results = treeUtil.searchNodeFromTree(inputValue, idStr, titleStr, childrenStr, treeListOriginCopy)
+
+      this.setData({
+        treeList: results
+      })
 
     })
 
