@@ -424,7 +424,7 @@
 		*/
 	* 
 	
-5. 搜索方法需要怎么设计?
+5. 搜索方法需要怎么设计?(ok)
 	* 首先还是要获得 treeList 和 treeListOrigin
 	* treeList负责内部属性变更, treeListOrigin负责在空串直接返回 => 但是似乎没必要传treeListOrigin?
 	* 似乎传treeList不太行,因为treeList本身是变化,导致第二次搜索不准确,因此还是要传treeListOrigin的拷贝
@@ -460,3 +460,5 @@
 	* 还要传个titleStr啊
 	* 寻找祖先的方法设计:
 		=> 需要一个childrenStr 
+		
+6. 搜索功能的优化,应该使用深度优先遍历的算法去回溯,而不是每次都反复寻找祖先		
