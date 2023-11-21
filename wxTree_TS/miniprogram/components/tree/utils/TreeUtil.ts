@@ -49,26 +49,41 @@ class TreeUtil {
    * @param idStr 
    * @param childrenStr 
    */
-  clickNodeTravel(treeList: Array<WxTree.TreeNode>, node: WxTree.TreeNode, idStr: string, childrenStr: string, searchMode: boolean): void {
+  clickNodeTravel(treeList: Array<WxTree.TreeNode>, node: WxTree.TreeNode, idStr: string, childrenStr: string, searchMode: boolean, searchOnlyRelative: boolean): void {
     for (const item of treeList) {
 
       if (item[idStr] === node[idStr]) {
         item.isClick = true
-        if(searchMode==false){
+        /**
+         * 委托recordTrack展示孩子
+         */
+        if (searchMode && searchOnlyRelative && item[childrenStr]) {
+          this.travelNodeForVisible(item, childrenStr)
+        }
+        if (searchMode == false) {
           return
         }
-        
-      }else{
+
+      } else {
         item.isClick = false
       }
 
       if (item[childrenStr] && item[childrenStr].length) {
-        this.clickNodeTravel(item[childrenStr], node, idStr, childrenStr, searchMode)
+        this.clickNodeTravel(item[childrenStr], node, idStr, childrenStr, searchMode, searchOnlyRelative)
       }
     }
 
 
 
+  }
+
+  travelNodeForVisible(node: WxTree.TreeNode, childrenStr: string): void {
+    node[childrenStr].forEach((child: WxTree.TreeNode) => {
+      child.hidden = false
+      if (child[childrenStr]) {
+        this.travelNodeForVisible(child, childrenStr)
+      }
+    })
   }
   /**
    * 

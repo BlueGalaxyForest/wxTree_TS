@@ -1,4 +1,6 @@
 // components/tree/inside.ts
+import TreeUtil from './utils/TreeUtil'
+const treeUtil = new TreeUtil()
 Component({
 
   /**
@@ -80,6 +82,7 @@ Component({
      */
     toggleShowChildren<T>(e: WxTree.TouchEventWithMark<T>) {
       const node = e.mark?.item
+      console.log('toggle->', node)
 
       if (node.hasOwnProperty('openChildren')) {
         this.setData({
@@ -94,16 +97,18 @@ Component({
       })
 
       /**
-       * 解除一些节点的隐藏状态
+       * 解除一些节点的隐藏状态 
+       * 如果开启了印记模式,印记帮忙把Children的hidden:false 改为 true;
+       * 如果没有开启印记模式,自己去判断做这件事情
        */
-      if (this.data.options.searchOnlyRelative && node[this.data.children]) {
-        node[this.data.children].forEach((item: WxTree.TreeNode) => {
-          item.hidden = false
-        })
+      if (this.data.options.searchMode && this.data.options.searchOnlyRelative && !this.data.options.recordTrack && node[this.data.children]) {
+        treeUtil.travelNodeForVisible(node, this.data.children)
+
         this.setData({
           treeItem: node
         })
       }
+
     },
     /**
      * 点击节点标题的触发事件

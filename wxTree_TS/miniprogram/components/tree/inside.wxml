@@ -1,16 +1,20 @@
 <view class="treeList c{{step}}">
   <view class="line" style="margin-left:{{(step-1)*20}}px;"></view>
- 
-  <view class="title" style="margin-left:{{(step-1)*20}}px; display: {{options.searchOnlyRelative && treeItem.hidden?'none':'flex'}};">
 
-    <view class="icon" wx:if="{{(treeItem[children].length && isShowChildren) || (treeItem.openChildren)}}" mark:item="{{treeItem}}" catchtap="toggleShowChildren">
-      -</view>
-    <view class="icon" wx:elif="{{!treeItem[children]}}">
-      <view class="dot" style="background-color: {{options.dotBg}};"></view>
+  <view hidden="{{options.searchOnlyRelative && treeItem.hidden  }}" class="row" style="margin-left:{{(step-1)*20}}px;">
+
+
+    <view class="title">
+      <view class="icon" wx:if="{{(treeItem[children].length && isShowChildren) || (treeItem.openChildren)}}" mark:item="{{treeItem}}" catchtap="toggleShowChildren">
+        -</view>
+      <view class="icon" wx:elif="{{!treeItem[children]}}">
+        <view class="dot" style="background-color: {{options.dotBg}};"></view>
+      </view>
+      <view class="icon" wx:else mark:item='{{treeItem}}' catchtap="toggleShowChildren">+</view>
+
+      <view class="text {{treeItem.isClick?'click-active':''}} {{treeItem.isFound?'found-active':''}}" style="background-color:{{treeItem.isClick?options.clickBg:''}} {{treeItem.isFound?options.searchBg:''}}" bind:tap="nodeClick" mark:item='{{treeItem}}'>{{treeItem[title]}}</view>
     </view>
-    <view class="icon" wx:else mark:item='{{treeItem}}' catchtap="toggleShowChildren">+</view>
 
-    <view class="text {{treeItem.isClick?'click-active':''}} {{treeItem.isFound?'found-active':''}}" style="background-color:{{treeItem.isClick?options.clickBg:''}} {{treeItem.isFound?options.searchBg:''}}" bind:tap="nodeClick" mark:item='{{treeItem}}'>{{treeItem[title]}}</view>
   </view>
 
 

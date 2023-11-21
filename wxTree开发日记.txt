@@ -526,7 +526,7 @@
 		4. 要写方法重载还是加个字段仅仅作为标识-> 方法重载把=> 方法重载不好用于递归,所以还是加入字段区分(ok)
 		
 		
-@ 搜索到根节点的时候,发现打不开孩子=> 因为孩子的hidden等于true
+@ 搜索到根节点的时候,发现打不开孩子=> 因为孩子的hidden等于true =>增加了严格限定,一旦严格限定没有拦截成功,效率可能会降低(OK)
 	* 印记太坑了 => 暂时关闭了
 	* 当results为空数组的时候,需要再次给全局的孩子收缩?=> 当 if (inputValue === '') {} 时=> 有时候又不生效
 	* 搜索的话是用了 treeListOrigin的拷贝,但是子组件并没有销毁,isShowChildren属性仍然在组件内部承担着打开状态
@@ -535,7 +535,28 @@
 		=> searchAwake往下传就行了,默认isShowChildren设为false,这样就可以显示一个加号了(ok)
 		
 	1. 目前没有点击印记,一些逻辑正常(ok)
-	@ // searchOnlyRelative: true, //这个配置感觉有毒啊 ? true && undefined 在 JS里面等于 true?
+	@ // searchOnlyRelative: true, //这个配置感觉有毒啊 ? true && undefined 在 JS里面等于 true? 
+		-> && (treeItem.hidden===undefined?false:treeItem.hidden)
+		-> 我的印记的来源是:点击印记需要到最外面才去找印记啊,在最外面才会有一个印记的setData
+		-> 但是你点击node的时候,触发nodeClick,同时也触发toggle,而toggle这个节点没有isClick属性:  => 一闪而过说明这个setData是慢了
+		-> this.data.options.searchOnlyRelative && 关系不大感觉,因为
+			childs: (3) [{…}, {…}, {…}]
+			movieId: 2
+			parentId: 0
+			typeName: "日本分区"
+			wxTreeId: 2
+					
+		-> 就是说recordTrack能不能帮我把孩子展开下=> 可以的
+		-> 如果我没有开启印记,谁来帮你展开? ->没有开启印记就需要自己判断去展开(OK)
+		-> 但是展开的Children又不会一直保持
+			* toggle是有节点的
+			* 因为他没有遍历所有的把所有的都展开,他只是遍历了一代而已,因此再次点击根节点setData就会导致用了没有被处理到的节点=> searchAwake传个true下去?
+			* 还是要加限制并且全局遍历node
+			* 需要再treeUtil写个遍历:
+			      if (this.data.options.searchMode && this.data.options.searchOnlyRelative && !this.data.options.recordTrack && node[this.data.children]) {}
+			* record也需要增加严格的限定模式	  =>         treeUtil.travelNodeForVisible(node, this.data.children)
+			
+			
 		
 11. 做一下树的编辑模式
 	* 对于任意一个节点都有 添加,修改节点名称,删除,移动
