@@ -1,8 +1,8 @@
-<view class="main" style="{{options.searchInputCss}}"> 
+<view class="main" style="{{options.searchInputCss}}">
   <view class="input-box" wx:if="{{options.searchMode}}">
     <input class="input" bindinput="onInput" type="text" />
   </view>
   <block wx:for="{{treeList}}" wx:key="index">
-    <tree treeItem="{{item}}" options="{{options}}" flatExpand="{{flatExpand}}" keepAlive="{{keepAlive}}" step="1" bind:nodeClick="nodeClick"></tree>
+    <tree treeItem="{{item}}" options="{{options}}" isShowChildren="{{isShowChildren}}" flatExpand="{{flatExpand}}" keepAlive="{{keepAlive}}" searchAwake="{{searchAwake}}" step="1" bind:nodeClick="nodeClick"></tree>
   </block>
 </view>

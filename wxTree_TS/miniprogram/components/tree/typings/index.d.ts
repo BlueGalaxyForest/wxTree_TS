@@ -21,7 +21,9 @@ declare namespace WxTree {
     clickBg?: string,  //点击节点的背景颜色(recordTrack设为true的时候起作用)
     recordTrack?: boolean, //是否开启点击印记,true表示开启;默认:false
     searchMode?: boolean,  //是否开启搜索模式,true代表开启;默认false
-    searchInputCss?:string,  //在searchMode:true下,设置输入框的背景色
+    searchInputCss?:string,  //在searchMode:true下,设置输入框的样式,如果没有这个配置,没关系会有默认样式
+    searchOnlyRelative?:boolean,//在searchMode:true下,设置搜索的节点是否仅仅是父级相关的,默认为false
+    editMode?:boolean,  //是否开启编辑节点模式,true代表开启,默认为false
     treeObjProps: {
       id: string,     //tree对象的唯一标识
       title: string,  //树形UI用于展示的文本

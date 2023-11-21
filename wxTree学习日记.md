@@ -156,3 +156,72 @@ public class NaryTreeDFS {
 
   
 
+# 关于isClick点击印记的性能瓶颈问题
+
+"每个节点的比较都涉及到了两个属性的比较，即 item[idStr] === node[idStr]。如果树结构很大，这样的比较操作可能会成为性能瓶颈。在这种情况下，你可能需要考虑是否可以优化数据结构，或者使用一些数据索引或哈希表来提高查找效率。"
+
+```TS
+class TreeNode {
+  id: string;
+  isClick: boolean;
+  children: TreeNode[];
+
+  constructor(id: string) {
+    this.id = id;
+    this.isClick = false;
+    this.children = [];
+  }
+}
+
+class Tree {
+  root: TreeNode;
+  idIndex: Record<string, TreeNode>;
+
+  constructor() {
+    this.root = new TreeNode('root');
+    this.idIndex = {};
+  }
+
+  addNode(parentId: string, newNodeId: string) {
+    const parentNode = this.idIndex[parentId] || this.root;
+    const newNode = new TreeNode(newNodeId);
+    parentNode.children.push(newNode);
+    this.idIndex[newNodeId] = newNode;
+  }
+
+  clickNode(nodeId: string) {
+    const node = this.idIndex[nodeId];
+    if (node) {
+      node.isClick = true;
+    }
+  }
+}
+
+// 示例用法
+const tree = new Tree();
+
+// 添加节点
+tree.addNode('root', '1');
+tree.addNode('root', '2');
+tree.addNode('1', '1-1');
+tree.addNode('1', '1-2');
+tree.addNode('2', '2-1');
+tree.addNode('2', '2-2');
+
+// 点击节点
+tree.clickNode('1-2');
+
+```
+
+```
+root
+|-- 1
+|   |-- 1-1
+|   |-- 1-2
+|
+|-- 2
+    |-- 2-1
+    |-- 2-2
+
+```
+

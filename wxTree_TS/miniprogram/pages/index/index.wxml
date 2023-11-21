@@ -2,20 +2,10 @@
 
   <view class="tree-box">
     <wxTree listData="{{movieList}}" options="{{treeOptions}}" bind:nodeClick="nodeClick"></wxTree>
-    <!-- <wxTree listData="{{cityTree}}" options="{{treeOptions2}}" bind:nodeClick="nodeClick"></wxTree> -->
   </view>
 
+  <!-- <view class="tree-box">
+    <wxTree listData="{{cityTree}}" options="{{treeOptions2}}" bind:nodeClick="nodeClick"></wxTree>
+  </view> -->
 
-  <view class="testBg" style="margin-top: 30px;">
-    测试背景
-  </view>
-
-  <view class="testBg2">
-    测试背景2
-  </view>
-
-
-  <view class="testText">
-    测试文字
-  </view>
 </view>

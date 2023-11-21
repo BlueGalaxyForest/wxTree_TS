@@ -1,6 +1,7 @@
 <view class="treeList c{{step}}">
   <view class="line" style="margin-left:{{(step-1)*20}}px;"></view>
-  <view class="title" style="margin-left:{{(step-1)*20}}px;">
+ 
+  <view class="title" style="margin-left:{{(step-1)*20}}px; display: {{options.searchOnlyRelative && treeItem.hidden?'none':'flex'}};">
 
     <view class="icon" wx:if="{{(treeItem[children].length && isShowChildren) || (treeItem.openChildren)}}" mark:item="{{treeItem}}" catchtap="toggleShowChildren">
       -</view>
@@ -9,8 +10,7 @@
     </view>
     <view class="icon" wx:else mark:item='{{treeItem}}' catchtap="toggleShowChildren">+</view>
 
-    <view class="text {{treeItem.isClick?'click-active':''}} {{treeItem.isFound?'found-active':''}}" 
-    style="background-color:{{treeItem.isClick?options.clickBg:''}} {{treeItem.isFound?options.searchBg:''}}" bind:tap="nodeClick" mark:item='{{treeItem}}'>{{treeItem[title]}}</view>
+    <view class="text {{treeItem.isClick?'click-active':''}} {{treeItem.isFound?'found-active':''}}" style="background-color:{{treeItem.isClick?options.clickBg:''}} {{treeItem.isFound?options.searchBg:''}}" bind:tap="nodeClick" mark:item='{{treeItem}}'>{{treeItem[title]}}</view>
   </view>
 
 
@@ -20,13 +20,13 @@
 
   <block wx:if="{{keepAlive}}">
     <view hidden="{{(isShowChildren===false || treeItem[children].length<=0) && !treeItem.openChildren}}" wx:for="{{treeItem[children]}}" wx:key="index">
-      <tree treeItem="{{item}}" options="{{options}}" keepAlive="{{keepAlive}}" step="{{step+1}}" bind:nodeClick='nodeClick'></tree>
+      <tree treeItem="{{item}}" flatExpand="{{flatExpand}}" searchAwake="{{searchAwake}}" options="{{options}}" keepAlive="{{keepAlive}}" step="{{step+1}}" bind:nodeClick='nodeClick'></tree>
     </view>
   </block>
 
   <block wx:else>
     <view wx:if="{{(treeItem[children].length>0&&isShowChildren) || treeItem.openChildren}}" wx:for="{{treeItem[children]}}" wx:key="index">
-      <tree treeItem="{{item}}" options="{{options}}" keepAlive="{{keepAlive}}" step="{{step+1}}" bind:nodeClick='nodeClick'></tree>
+      <tree treeItem="{{item}}" flatExpand="{{flatExpand}}" searchAwake="{{searchAwake}}" options="{{options}}" keepAlive="{{keepAlive}}" step="{{step+1}}" bind:nodeClick='nodeClick'></tree>
     </view>
   </block>
 

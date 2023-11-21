@@ -17,8 +17,9 @@ Page({
       isTreeConstruct: false, //不是树结构
       recordTrack: true, //记录点击印记
       searchMode: true, //开启搜索模式
-      searchBg:'green',
+      searchBg: 'green',
       // searchInputCss: "--border-color:#DDDDDD;--border-radius:5px;--background-color:#33FFFF;--padding:5px 5px",//输入框的样式设置
+      searchOnlyRelative: true,
       treeObjProps: {
         id: 'movieId',
         title: 'typeName',

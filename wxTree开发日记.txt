@@ -463,8 +463,89 @@
 		
 6. 搜索功能的优化,应该使用深度优先遍历的算法去回溯,而不是每次都反复寻找祖先	
 	=> 但是尝试了很多方法,感觉还是各种方法都有他不足的地方,暂时选择这种方法吧
+	=> 还需要考虑setData栈溢出了啊!!!
 	* results数组似乎是多余的(OK)
 	
 7. openChildren也实现下搜索展示(OK)
 
-8. 点击的话需要考虑下openChildren	
+8. 点击的话需要考虑下openChildren => await recordTrack问题
+	@ openChildren属性添加了,节点展开收缩的状态点击有bug:
+		* 搜索魔法,可以顺利找到三个祖先,并且三个祖先的openChildren:true,hidden:false都是符合预期的(OK)
+		* 当直接点击`日本分区`的加号,是正常的,并且组件的展开状态也保留了 && 点击战败的加号减号,也不会出现bug
+			=> 直接点击加号,减号:  toggleNode-> {movieId: 2, typeName: "日本分区", parentId: 0, wxTreeId: 2, childs: Array(3), …}
+			=> 直接点击加号,减号: toggleNode-> {movieId: 12, typeName: "战败", parentId: 7, wxTreeId: 12, childs: Array(2), …}
+			=> 并且是走了        console.log('if hasOwnProperty branch-->') 分支,有对象本身的openChildren: false/true 控制节点展开收缩
+
+		--------	------
+		* 似乎与点击印记相关,关了点击印记,发现就无bug了
+			=> 关了印记,发现走的分支与纯toggle相同,因为纯toggle并不会向外抛出事件
+			toggleNode-> {movieId: 2, typeName: "日本分区", parentId: 0, wxTreeId: 2, childs: Array(3), …}
+				inside.ts:63 if hasOwnProperty branch-->
+				
+		* 因为开启印记,每一次点击都会造成recordTrack遍历,并且会导致重新setData:
+		       this.setData({
+				  treeList: treeListCopy
+				})
+				
+			-> 先把recordTrack封装为方法::(ok)
+			@ openChildren的优先级似乎要更高些; 如果openChildren存在应该由openChildren全权控制	 => 让isShowChildren: !node.openChildren 跟着node走就是了(ok)
+			@ hidden属性还没用上? =>  display: {{true && treeItem.hidden?'none':'flex'}}; 与display冲突? => 暂时这样吧(ok)
+			-> 直接搜索日本分区,节点似乎展不开
+
+9. 搜索时,可以来个,是否只展示有关节点的配置:searchOnlyRelative (ok)
+
+10. 关于recordTrack的优化:(OK)
+	* 点击印记开启与搜索状态开启是冲突的,因为搜索状态是给treeList的每一个treeItem加上了openChildren属性:true;
+	而点击印记直接去拿原始树了:      const treeListCopy: Array<WxTree.TreeNode> = JSON.parse(JSON.stringify(this.data.treeListOrigin)) ;
+	=> 而原始树是没有isOpenChildren属性的,而层层的isShowChild又没有被激活
+	
+	* searchNode的时候,能不能说搜到了节点给个结果标记?=> 因为没有收到结果,树并没有给提示文本,感觉需要一个hasResult标志层层传递,但是不是引用传递,还不如直接用results(ok)
+	* recordTrack是否采用原始树,是否可以用当前输入框的文本判断?
+		1. 搜索模式:searchMode:true
+		2. 搜索文本是没有记录到组件内部的
+		3. 如果searchMode为true,我就使用当前的treeList副本? => 但是也有问题,在之前的节点追踪模式,是基于效率的,而不是基于全局:
+			
+			/*
+			  clickNodeTravel(treeList: Array<WxTree.TreeNode>, node: WxTree.TreeNode, idStr: string, childrenStr: string): void {
+				for (const item of treeList) {
+
+				  if (item[idStr] === node[idStr]) {
+					item.isClick = true
+					return
+				  }
+
+				  if (item[childrenStr] && item[childrenStr].length) {
+					this.clickNodeTravel(item[childrenStr], node, idStr, childrenStr)
+				  }
+				}
+
+
+			  }
+			*/
+			
+		4. 要写方法重载还是加个字段仅仅作为标识-> 方法重载把=> 方法重载不好用于递归,所以还是加入字段区分(ok)
+		
+		
+@ 搜索到根节点的时候,发现打不开孩子=> 因为孩子的hidden等于true
+	* 印记太坑了 => 暂时关闭了
+	* 当results为空数组的时候,需要再次给全局的孩子收缩?=> 当 if (inputValue === '') {} 时=> 有时候又不生效
+	* 搜索的话是用了 treeListOrigin的拷贝,但是子组件并没有销毁,isShowChildren属性仍然在组件内部承担着打开状态
+	* 现象:就是搜索未搜索前,把日本分区点开了,然后再次搜索日本节点=> 节点是减号标志,但是孩子全部处于隐藏状态
+	* 搜索的时候,额外设置一个searchAwake,内部使用的标志,用来唤醒 => (false || false ) && !undefined = false => 我是真的傻逼,你不注意层tree传递? => 那么 isShowChild:false似乎可以生效,但是你不注重层级!!!
+		=> searchAwake往下传就行了,默认isShowChildren设为false,这样就可以显示一个加号了(ok)
+		
+	1. 目前没有点击印记,一些逻辑正常(ok)
+	@ // searchOnlyRelative: true, //这个配置感觉有毒啊 ? true && undefined 在 JS里面等于 true?
+		
+11. 做一下树的编辑模式
+	* 对于任意一个节点都有 添加,修改节点名称,删除,移动
+	* 添加节点的时候,那么新增的节点需要由唯一的id=> 在搜索节点使用到了,拿取节点的所有祖先需要id比较:
+		find((child: WxTree.TreeNode) => child[idStr] === node[idStr])) {....} && 节点的id本身就该唯一
+		-> 监听一个editMode:true,如果为true就先执行一波?
+		-> 可能一开始的话,options就传了editMode,但是,editMode和listData同时监听,谁先谁后怎么解?
+		-> Verify.listData(n)是个拦截:: 这段代码一旦执行完,一棵树也出来了
+		-> editMode为true,需要看看treeListOrigin是否为空数组[],如果不为空数组说明准备好了
+		-> 要不要判断对象唯一id的类型?如果是number类型使用有序数组?如果使用雪花算法? => 可以在listData监听到id类型存储下来
+		
+	1. 添加模式的实现:
+		* 

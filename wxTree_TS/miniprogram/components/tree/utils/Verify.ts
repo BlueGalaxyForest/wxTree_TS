@@ -27,7 +27,7 @@ class Verify {
    * 如果list已经是树,就要读取相关属性名的配置.
    * @param list 
    */
-  listData(list: object[]): WxTree.TreeNode {
+  listData(list: object[]): Array<WxTree.TreeNode> {
     const options = this.options
     if (options.isTreeConstruct) { //当前list是树
 

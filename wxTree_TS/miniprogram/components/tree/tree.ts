@@ -46,25 +46,33 @@ Component({
 
   observers: {
     'listData': function (n: Array<WxTree.TreeNode>) {
+      console.log('listData listen->', n)
 
       if (n.length) {
         const Verify = new _Verify(this.data.options as WxTree.TreeOptions)
-        const treeList: WxTree.TreeNode = Verify.listData(n)
-        console.log('treeList--->', treeList)
+        const treeList: Array<WxTree.TreeNode> = Verify.listData(n)
+
         this.setData({
           treeList,
           treeListOrigin: treeList
         })
       }
+    },
+
+    'options.editMode': function (n: boolean) {
+      console.log('options.editMode listen->', n)
     }
+
   },
 
   /**
    * 组件的初始数据
    */
   data: {
-    treeList: {} as WxTree.TreeNode, //普通列表转化的树
-    treeListOrigin: {} as WxTree.TreeNode  //treeList的拷贝
+    treeList: [] as Array<WxTree.TreeNode>, //普通列表转化的树
+    treeListOrigin: [] as Array<WxTree.TreeNode>,  //treeList的拷贝
+
+    searchAwake: false, //搜索唤醒的标志,在搜索setData({treeList:xxx})时,用于让后代检测节点相关状态
   },
 
   /**
@@ -75,19 +83,39 @@ Component({
 
       this.triggerEvent('nodeClick', e.detail)
       if (this.data.options.recordTrack) { //开启点击印记功能
-        const treeUtil = new TreeUtil()
-        const treeListCopy: Array<WxTree.TreeNode> = JSON.parse(JSON.stringify(this.data.treeListOrigin))
-        const clickedNode: WxTree.TreeNode = e.detail
-        const idStr = this.data.options.treeObjProps.id
-        const childrenStr = this.data.options.treeObjProps.children || 'children' //因为childrenStr在非树列表情况下是可选的
-        treeUtil.clickNodeTravel(treeListCopy, clickedNode, idStr, childrenStr)
-
-
-        this.setData({
-          treeList: treeListCopy
-        })
-
+        this.recordTrack(e.detail)
       }
+    },
+
+    /**
+     * 具体开启点击印记的逻辑:
+     * @param node 被点击的node节点
+     */
+    recordTrack(node: WxTree.TreeNode) {
+      const treeUtil = new TreeUtil()
+      const clickedNode: WxTree.TreeNode = node
+      const idStr: string = this.data.options.treeObjProps.id
+      const childrenStr: string = this.data.options.treeObjProps.children || 'children' //因为childrenStr在非树列表情况下是可选的
+      const searchMode: boolean = this.data.options.searchMode
+
+      let treeListRecord: Array<WxTree.TreeNode> = [] //根据searchMode来决定追踪哪一颗树
+      if (searchMode) {
+        treeListRecord = JSON.parse(JSON.stringify(this.data.treeList))
+      } else {
+        treeListRecord = JSON.parse(JSON.stringify(this.data.treeListOrigin))
+      }
+
+      treeUtil.clickNodeTravel(treeListRecord, clickedNode, idStr, childrenStr, searchMode)
+
+      this.setData({
+        treeList: treeListRecord
+      })
+
+
+      setTimeout(() => {
+        console.log('recordTrack treeList->', this.data.treeList)
+      }, 2000)
+
     },
 
     /**
@@ -104,9 +132,16 @@ Component({
       const treeUtil = new TreeUtil()
       const results = treeUtil.searchNodeFromTree(inputValue, idStr, titleStr, childrenStr, treeListOriginCopy)
 
+      if (inputValue === '') {
+        this.setData({
+          isShowChildren: false
+        })
+      }
       this.setData({
-        treeList: results
+        treeList: results,
+        searchAwake: true
       })
+      console.log('onInput treeList->', this.data.treeList)
 
     })
 

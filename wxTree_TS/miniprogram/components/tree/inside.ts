@@ -30,6 +30,10 @@ Component({
       value: {
 
       }
+    },
+    searchAwake: {
+      type: Boolean,
+      value: true
     }
   },
 
@@ -48,6 +52,24 @@ Component({
       })
     }
   },
+  observers: {
+
+    'searchAwake': function (n: boolean) {
+      if (!n) return
+
+      const treeItem: WxTree.TreeNode = this.data.treeItem
+      const isShowChildren = this.data.isShowChildren
+      console.log('searchAwake->', n, treeItem, isShowChildren)
+      if (isShowChildren && !treeItem.hidden && treeItem[this.data.children]) {
+
+        this.setData({
+          isShowChildren: false
+        })
+
+      }
+    }
+
+  },
   /**
    * 组件的方法列表
    */
@@ -58,10 +80,11 @@ Component({
      */
     toggleShowChildren<T>(e: WxTree.TouchEventWithMark<T>) {
       const node = e.mark?.item
-      console.log('toggleNode->',node)
+
       if (node.hasOwnProperty('openChildren')) {
         this.setData({
-          'treeItem.openChildren': !node.openChildren
+          'treeItem.openChildren': !node.openChildren,
+          isShowChildren: !node.openChildren
         })
         return
       }
@@ -73,12 +96,12 @@ Component({
       /**
        * 解除一些节点的隐藏状态
        */
-      if (node.children) {
-        node.children.forEach((item: WxTree.TreeNode) => {
+      if (this.data.options.searchOnlyRelative && node[this.data.children]) {
+        node[this.data.children].forEach((item: WxTree.TreeNode) => {
           item.hidden = false
         })
         this.setData({
-          listData: node
+          treeItem: node
         })
       }
     },
