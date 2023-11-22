@@ -569,4 +569,14 @@
 		-> 要不要判断对象唯一id的类型?如果是number类型使用有序数组?如果使用雪花算法? => 可以在listData监听到id类型存储下来
 		
 	1. 添加模式的实现:
-		* 
+		* 监听editMode触发方法:=> 不要监听,可以在Verify里面去拦截(OK)
+		* editMode为true的话需要调用editTreeInit,最后list的返回结果可能要改(OK)
+		* 判断id的类型是string是number(OK)
+		* 如果是number类型,遍历treeList,并且为id进行从小到大排序,这样可以便于我后续添加节点时,id不重复的做法方便(OK)
+			-> 遍历一个树形数组,数组里面的每一个对象的唯一标识符对应的值是number类型,例如{movieId:1,name:'湛蓝'};我在遍历这颗树形数组的同时
+			我要每个对象id所对应的值,拿到,并且做一个升序排序,得到一个id集合的数组,从小到大排序的
+			
+			* 编写一个 travelTreeForIdValue(OK)
+			
+		* 现在准备下这个非number类型的id值数据(OK)
+			-> convertTree都有毒了,针对parentId为空串的情况有毒 => 没,因为children是可选的你知道吗? (OK)

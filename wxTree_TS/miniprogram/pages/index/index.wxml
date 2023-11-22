@@ -1,11 +1,14 @@
 <view class="main">
 
-  <view class="tree-box">
+  <!-- <view class="tree-box">
     <wxTree listData="{{movieList}}" options="{{treeOptions}}" bind:nodeClick="nodeClick"></wxTree>
-  </view>
+  </view> -->
 
   <!-- <view class="tree-box">
     <wxTree listData="{{cityTree}}" options="{{treeOptions2}}" bind:nodeClick="nodeClick"></wxTree>
   </view> -->
 
+  <view class="tree-box">
+    <wxTree listData="{{productList}}" options="{{treeOptions3}}" bind:nodeClick="nodeClick"></wxTree>
+  </view>
 </view>

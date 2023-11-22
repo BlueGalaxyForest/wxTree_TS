@@ -46,11 +46,12 @@ Component({
 
   observers: {
     'listData': function (n: Array<WxTree.TreeNode>) {
-      console.log('listData listen->', n)
+      console.log('listData listen->', n, this.properties)
 
       if (n.length) {
         const Verify = new _Verify(this.data.options as WxTree.TreeOptions)
-        const treeList: Array<WxTree.TreeNode> = Verify.listData(n)
+        const editMode = this.properties.options.editMode
+        const treeList: Array<WxTree.TreeNode> = Verify.listData(n,editMode)
 
         this.setData({
           treeList,
@@ -59,9 +60,7 @@ Component({
       }
     },
 
-    'options.editMode': function (n: boolean) {
-      console.log('options.editMode listen->', n)
-    }
+ 
 
   },
 
@@ -97,7 +96,7 @@ Component({
       const idStr: string = this.data.options.treeObjProps.id
       const childrenStr: string = this.data.options.treeObjProps.children || 'children' //因为childrenStr在非树列表情况下是可选的
       const searchMode: boolean = this.data.options.searchMode
-      const searchOnlyRelative:boolean = this.data.options.searchOnlyRelative
+      const searchOnlyRelative: boolean = this.data.options.searchOnlyRelative
 
       let treeListRecord: Array<WxTree.TreeNode> = [] //根据searchMode来决定追踪哪一颗树
       if (searchMode) {
@@ -106,16 +105,12 @@ Component({
         treeListRecord = JSON.parse(JSON.stringify(this.data.treeListOrigin))
       }
 
-      treeUtil.clickNodeTravel(treeListRecord, clickedNode, idStr, childrenStr, searchMode,searchOnlyRelative)
+      treeUtil.clickNodeTravel(treeListRecord, clickedNode, idStr, childrenStr, searchMode, searchOnlyRelative)
 
       this.setData({
         treeList: treeListRecord
       })
 
-
-      setTimeout(() => {
-        console.log('recordTrack treeList->', this.data.treeList)
-      }, 2000)
 
     },
 
@@ -142,10 +137,10 @@ Component({
         treeList: results,
         searchAwake: true
       })
-      console.log('onInput treeList->', this.data.treeList)
-
-    })
 
 
+    }),
+
+ 
   }
 })

@@ -32,12 +32,15 @@ class TreeUtil {
       };
 
       const parent = map[item[fatherId]];
+      
       if (parent) {
         (parent[children ? children : 'children'] || (parent[children ? children : 'children'] = [])).push(map[item[id]]);
       } else {
         result.push(map[item[id]]);
       }
     });
+
+     
 
     return result;
   }
@@ -84,6 +87,22 @@ class TreeUtil {
         this.travelNodeForVisible(child, childrenStr)
       }
     })
+  }
+
+  /**
+   * 
+   * @param treeList 
+   * @param idStr 
+   * @param childrenStr 
+   * @param idValues 
+   */
+  travelTreeForIdValue(treeList: Array<WxTree.TreeNode>, idStr: string, childrenStr: string, idValues: (number | string)[]) {
+    for (const item of treeList) {
+      idValues.push(item[idStr])
+      if (item[childrenStr] && item[childrenStr].length) {
+        this.travelTreeForIdValue(item[childrenStr], idStr, childrenStr, idValues)
+      }
+    }
   }
   /**
    * 

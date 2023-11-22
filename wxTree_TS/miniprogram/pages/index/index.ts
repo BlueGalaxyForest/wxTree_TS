@@ -2,6 +2,8 @@
 // 获取应用实例
 import cityTree from '../../datas/cityTree'
 import movieList from '../../datas/movieList'
+import productList from '../../datas/products'
+
 import TreeUtil from '../../components/tree/utils/TreeUtil'
 
 const treeUtil = new TreeUtil()
@@ -19,6 +21,7 @@ Page({
       searchMode: true, //开启搜索模式
       searchBg: 'green',
       // searchInputCss: "--border-color:#DDDDDD;--border-radius:5px;--background-color:#33FFFF;--padding:5px 5px",//输入框的样式设置
+      editMode: true,
       searchOnlyRelative: true,
       treeObjProps: {
         id: 'movieId',
@@ -40,12 +43,24 @@ Page({
         fatherId: '',  //如果是树,这里传空串就行了
         children: 'children'
       }
+    } as WxTree.TreeOptions,
+
+    /**
+     * 关于editMode:true
+     */
+    treeOptions3: {
+      editMode:true,
+      treeObjProps: {
+        id: 'id',
+        title: 'name',
+        fatherId: 'parentId'
+      }
     }
   },
 
   onLoad() {
     this.setData({
-      movieList, cityTree
+      movieList, cityTree,productList
     })
   },
 

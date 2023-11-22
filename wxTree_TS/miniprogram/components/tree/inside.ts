@@ -50,7 +50,7 @@ Component({
     attached() {
       this.setData({
         title: this.data.options.treeObjProps.title,
-        children: this.data.options.treeObjProps.children
+        children: this.data.options.treeObjProps.children || 'children'
       })
     }
   },
@@ -82,7 +82,7 @@ Component({
      */
     toggleShowChildren<T>(e: WxTree.TouchEventWithMark<T>) {
       const node = e.mark?.item
-      console.log('toggle->', node)
+    
 
       if (node.hasOwnProperty('openChildren')) {
         this.setData({
