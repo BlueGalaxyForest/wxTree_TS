@@ -49,18 +49,18 @@ Page({
      * 关于editMode:true
      */
     treeOptions3: {
-      editMode:true,
+      editMode: true,
       treeObjProps: {
         id: 'id',
         title: 'name',
-        fatherId: 'parentId'
+        fatherId: 'parentId',
       }
     }
   },
 
   onLoad() {
     this.setData({
-      movieList, cityTree,productList
+      movieList, cityTree, productList
     })
   },
 
@@ -71,5 +71,9 @@ Page({
   nodeClick(e: WechatMiniprogram.Touch) {
     const node = e.detail
     console.log('选择的节点:', node)
+  },
+
+  nodeEditResult(e: WechatMiniprogram.Touch) {
+    console.log('page get Edit result', e.detail)
   }
 })

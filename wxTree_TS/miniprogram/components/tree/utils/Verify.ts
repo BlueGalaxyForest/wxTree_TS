@@ -27,7 +27,7 @@ class Verify {
    * 如果list已经是树,就要读取相关属性名的配置.
    * @param list 
    */
-  listData(list: object[], editMode: boolean): Array<WxTree.TreeNode> {
+  listData(list: object[], editMode: boolean) {
     const options = this.options
     let treeList: Array<WxTree.TreeNode> = []
 
@@ -42,31 +42,44 @@ class Verify {
     }
 
     if (editMode) {
-      this.editTreeInit(treeList, options)
+      const idInfo = this.editTreeInit(treeList, options)
+      treeList.forEach((root:WxTree.TreeNode)=>{
+        root.isRoot = true
+      })
+      return { treeList, idInfo }
     }
-    return treeList
-
+    return { treeList, idInfo: {idType:'default',idValues:[]} }
   }
+
+
+
   /**
    * 编辑模式做的一些初始化
    * @param treeList 
    * @param options 
    */
-  editTreeInit(treeList: WxTree.TreeNode[], options: WxTree.TreeOptions) {
-    console.log('--->editMode--->Init', treeList, options)
-    const idType = typeof treeList[0][options.treeObjProps.id]
+  editTreeInit(treeList: WxTree.TreeNode[], options: WxTree.TreeOptions): {
+    idType: string | number;
+    idValues: (string | number)[]
+  } {
+
+    const idType: number | string = typeof treeList[0][options.treeObjProps.id]
     const idStr = options.treeObjProps.id
     const childrenStr = options.treeObjProps.children || 'children'
     let idValues: (number | string)[] = []
 
     this.treeUtil.travelTreeForIdValue(treeList, idStr, childrenStr, idValues)
-    console.log('idType-->', idType, typeof idType)
+
 
     if (idType === "number") {
       idValues.sort((a, b) => (a as number) - (b as number)); //这里报错了怎么办啊?参数“a”和“a” 的类型不兼容。不能将类型“string | number”分配给类型“number”。不能将类型“string”分配给类型“number”。ts(2345)
     }
 
-    console.log('idValues--->', idValues)
+
+    return {
+      idType,
+      idValues
+    }
   }
 }
 

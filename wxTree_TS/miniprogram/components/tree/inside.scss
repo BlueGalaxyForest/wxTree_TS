@@ -3,15 +3,16 @@
   position: relative;
   font-size: 30rpx;
   margin: 15rpx 0;
- 
+
+  // border: 1px solid red;
 
   .line {
     position: absolute;
     height: calc(100% - 30rpx);
-
+    // height: calc(100% - 0rpx);
     width: 0px;
     border-right: 1rpx dashed #999999;
-    left: 21rpx;
+    left: 23rpx;
     top: 49rpx;
   }
 
@@ -20,7 +21,7 @@
   .title {
     display: flex;
     align-items: center;
- 
+
 
     .icon {
       display: flex;
@@ -45,7 +46,7 @@
 
 
     .text {
- 
+
       padding: 6rpx 10rpx;
       border-radius: 10rpx;
     }
@@ -54,10 +55,66 @@
 
 }
 
-.click-active{
+.click-active {
   background-color: rosybrown !important;
 }
 
-.found-active{
+.found-active {
   background-color: lightblue;
+}
+
+.node-box {
+  display: flex;
+
+  align-items: center;
+
+  .edit-ops {
+    border: 1px solid blue;
+    display: flex;
+    align-items: center;
+    margin-left: 10rpx;
+    .img {
+      height: 42rpx;
+      width: 42rpx;
+      padding: 0 8rpx;
+    }
+  }
+}
+
+.mark-move-node {
+  background-color: 	#00AAAA !important;
+  padding: 10rpx 0;
+}
+
+.move-mark{
+  color: 	#FF7744;
+}
+
+.edit-area {
+
+  padding: 10rpx 0;
+
+  .add {
+    border: 1px solid red;
+    display: flex;
+    align-items: center;
+    padding: 5rpx 42rpx;
+
+    .input {
+      border: 1px solid #808080;
+      padding: 5rpx 5rpx;
+    }
+
+    .btn {
+      background-color: #00BBFF;
+      padding: 5rpx 10rpx;
+      margin: 0 10rpx;
+      color: #fff;
+      border-radius: 10rpx;
+    }
+
+    .cancel {
+      background-color: #FF8800;
+    }
+  }
 }

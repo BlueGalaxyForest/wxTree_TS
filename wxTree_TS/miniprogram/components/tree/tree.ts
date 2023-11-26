@@ -51,17 +51,23 @@ Component({
       if (n.length) {
         const Verify = new _Verify(this.data.options as WxTree.TreeOptions)
         const editMode = this.properties.options.editMode
-        const treeList: Array<WxTree.TreeNode> = Verify.listData(n,editMode)
+        const { treeList, idInfo } = Verify.listData(n, editMode)
 
         this.setData({
           treeList,
-          treeListOrigin: treeList
+          treeListOrigin: treeList,
+          idInfo
         })
       }
     },
 
- 
 
+
+  },
+  lifetimes: {
+    attached() {
+
+    }
   },
 
   /**
@@ -72,6 +78,12 @@ Component({
     treeListOrigin: [] as Array<WxTree.TreeNode>,  //treeList的拷贝
 
     searchAwake: false, //搜索唤醒的标志,在搜索setData({treeList:xxx})时,用于让后代检测节点相关状态
+    editAwake: {} as WxTree.TreeNode,  //编辑模式的唤醒标志
+    moveAwake: {} as WxTree.TreeNode,    //编辑模式->移动节点模式的标志唤醒
+    idInfo: {} as {
+      idType: string | number,
+      idValues: (string | number)[];
+    } //编辑模式使用到的
   },
 
   /**
@@ -86,6 +98,76 @@ Component({
       }
     },
 
+    nodeLongPress(e: WechatMiniprogram.Touch) {
+      console.log('root tree的nodeLongPress:', e)
+      this.setData({
+        editAwake: e.detail as WxTree.TreeNode
+      })
+    },
+    nodeEdit(e: WechatMiniprogram.Touch) {
+      const treeUtil = new TreeUtil()
+      const treeList = this.data.treeList
+      const type: string = e.detail.type
+      const node: WxTree.TreeNode = e.detail.node
+      const idInfo = this.data.idInfo
+      const treeObjProps: Record<string, any> = this.data.options.treeObjProps
+      treeObjProps.children = treeObjProps.children || 'children'
+
+      console.log('root Tree的node Edit 执行--->', type)
+
+
+      switch (type) {
+
+
+        case "-1": //root级别添加
+        case "0": //孩子级别添加
+          const text = e.detail.text //输入的文本
+          treeUtil.addNodeOfEdit(treeList, node, idInfo, treeObjProps, type, text)
+          this.setData({
+            treeList,
+            editAwake: {}
+          })
+          this.triggerEvent('nodeEditResult', treeList)
+          break;
+        case "1": //删除
+          treeUtil.delNodeOfEdit(treeList, node, null, treeObjProps)
+          this.setData({
+            treeList,
+            editAwake: {}
+          })
+          this.triggerEvent('nodeEditResult', treeList)
+          break;
+        case "2":
+
+          treeUtil.updateNodeOfEdit(treeList, node, treeObjProps, e.detail.text)
+          this.setData({
+            treeList,
+            editAwake: {}
+          })
+          this.triggerEvent('nodeEditResult', treeList)
+          break;
+        case "3":
+
+          console.log('root Tree MOVE Node', node, type, treeList, treeObjProps)
+
+          // treeUtil.moveNodeOfEdit(treeList,node,treeObjProps)
+          this.setData({
+            moveAwake: node
+          })
+          break;
+        case "4":
+          const markMoveBg = e.detail.markMoveBg
+          console.log('cancel--->', markMoveBg)
+          if (markMoveBg) {
+            this.setData({
+              moveAwake: {}
+            })
+            return
+          }
+
+          break;
+      }
+    },
     /**
      * 具体开启点击印记的逻辑:
      * @param node 被点击的node节点
@@ -141,6 +223,6 @@ Component({
 
     }),
 
- 
+
   }
 })

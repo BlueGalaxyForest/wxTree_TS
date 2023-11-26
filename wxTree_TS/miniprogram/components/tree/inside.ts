@@ -36,6 +36,14 @@ Component({
     searchAwake: {
       type: Boolean,
       value: true
+    },
+    editAwake: {
+      type: Object,
+      value: {} as WxTree.TreeNode
+    },
+    moveAwake: {
+      type: Object,
+      value: {} as WxTree.TreeNode
     }
   },
 
@@ -43,12 +51,20 @@ Component({
    * 组件的初始数据
    */
   data: {
+    id: '',  //节点的id文本名称
     title: '',//是节点的文本名字
-    children: '' //孩子的文本名字
+    children: '',//孩子的文本名字
+    showEditOps: false,// 是否展示编辑的操作
+    editType: '',//编辑类型
+    editInputText: '',//编辑模式下输入的文本
+    placeholder: '请输入内容',
+    moveMode: false,   //移动模式
+    markMoveBg: false, //用于标记当前移动的是哪个节点
   },
   lifetimes: {
     attached() {
       this.setData({
+        id: this.data.options.treeObjProps.id,
         title: this.data.options.treeObjProps.title,
         children: this.data.options.treeObjProps.children || 'children'
       })
@@ -69,6 +85,52 @@ Component({
         })
 
       }
+    },
+
+    'editAwake': function (n: WxTree.TreeNode) {
+      // console.log('son editAwake listen->', n)
+      if (JSON.stringify(n) != '{}') {
+
+        if (n[this.data.id] == this.data.treeItem[this.data.id]) {
+          this.setData({
+            showEditOps: true,
+            editType: ''
+          })
+        } else {
+
+
+          this.setData({
+            showEditOps: false,
+            editType: ''
+          })
+        }
+
+      } else {
+        this.setData({
+          showEditOps: false
+        })
+      }
+    },
+
+    'moveAwake': function (n: WxTree.TreeNode) {
+      console.log('son moveAwake ...', n)
+      if (JSON.stringify(n) != '{}') {
+        let markMoveBg = this.data.markMoveBg
+        const treeItem = this.data.treeItem
+
+        if (n[this.data.id] == treeItem[this.data.id]) {
+          markMoveBg = true
+        }
+        this.setData({
+          moveMode: true,
+          markMoveBg
+        })
+      } else {
+        this.setData({
+          moveMode: false
+        })
+      }
+
     }
 
   },
@@ -82,7 +144,7 @@ Component({
      */
     toggleShowChildren<T>(e: WxTree.TouchEventWithMark<T>) {
       const node = e.mark?.item
-    
+
 
       if (node.hasOwnProperty('openChildren')) {
         this.setData({
@@ -140,5 +202,134 @@ Component({
 
     },
 
+    /**
+     * 长按节点的触发事件
+     * @param e 
+     */
+    nodeLongPress(e: WechatMiniprogram.Touch) {
+      const editMode = this.data.options.editMode
+      if (!editMode) return
+
+
+
+      if (e.type === 'longpress') {
+        this.triggerEvent('nodeLongPress', e.mark?.item)
+      } else {
+        this.triggerEvent('nodeLongPress', e.detail)
+      }
+
+    },
+
+    /**
+     * 监听编辑模式
+     * @param e 
+     */
+    onEdit(e: WechatMiniprogram.Touch) {
+      const type = e.mark?.type //0添加;1删除;2修改;3移动;4取消
+      const node = this.data.treeItem
+      const editInputText = this.data.editInputText
+
+      console.log('type-->', type)
+      switch (type) {
+        case "-1":
+
+
+          this.setData({
+            editType: type,
+            showEditOps: false,
+            placeholder: '请输入根节点名称'
+          })
+          break;
+        case "0":
+
+          this.setData({
+            editType: type,
+            showEditOps: false,
+            placeholder: '请输入子节点名称'
+
+          })
+
+          break;
+        case "1":
+          console.log('son del')
+          this.triggerEvent('nodeEdit', { type, node })
+          break;
+        case "2":
+          this.setData({
+            editType: type,
+            showEditOps: false,
+            placeholder: '请输入修改后的节点名称',
+            editInputText: node[this.data.title]
+          })
+
+          break;
+        case "3":
+          this.triggerEvent('nodeEdit', { type, node })
+          break;
+        case "4":
+          if (this.data.markMoveBg) {
+            console.log('EditType==4,this.data.markMoveBg==',this.data.markMoveBg,type)
+            this.triggerEvent('nodeEdit', { type, markMoveBg: true })
+          }
+          this.setData({
+            showEditOps: false,
+            markMoveBg: false
+          })
+
+          break;
+      }
+    },
+    nodeEdit(e: WechatMiniprogram.Touch) {
+      console.log('node Edit--->', e)
+      this.triggerEvent('nodeEdit', e.detail)
+    },
+
+    editOperate(e: WechatMiniprogram.Touch) {
+      console.log('editOperate->', e, this.data.editType)
+      const editType = this.data.editType
+      const operType = e.mark?.operType
+      const editInputText = this.data.editInputText
+      const node = this.data.treeItem
+
+      if ((editType == "-1" || editType == "0" || editType == '2') && operType == '1') {
+        this.setData({
+          editType: ''
+        })
+        return
+      }
+
+      if ((editType == "-1" || editType == "0" || editType == '2') && operType == "0") { //检测文本不为空
+        if (!editInputText) {
+          wx.showToast({
+            title: '输入内容不能为空',
+            icon: 'none',
+            duration: 2000
+          })
+          return
+        }
+
+        this.setData({
+          editType: '',
+          editInputText: ''
+        })
+        if (editType == '2' && editInputText == node[this.data.title]) { //修改节点,如果文本不变节省效率
+          return
+        }
+
+        this.triggerEvent('nodeEdit', { type: editType, node, text: editInputText })
+      }
+
+
+
+
+    },
+    onEditInput(e: WechatMiniprogram.TextareaInput) {
+      console.log('this.data.editType-->', this.data.editType)
+
+
+      this.setData({
+        editInputText: e.detail.value.trim()
+      })
+    }
   }
 })

@@ -1,5 +1,5 @@
-
-
+import _UUID from './UUID'
+const UUID = new _UUID(1)
 
 
 
@@ -32,7 +32,7 @@ class TreeUtil {
       };
 
       const parent = map[item[fatherId]];
-      
+
       if (parent) {
         (parent[children ? children : 'children'] || (parent[children ? children : 'children'] = [])).push(map[item[id]]);
       } else {
@@ -40,7 +40,7 @@ class TreeUtil {
       }
     });
 
-     
+
 
     return result;
   }
@@ -205,6 +205,130 @@ class TreeUtil {
     }
 
     return null
+  }
+
+  /**
+   * 编辑模式添加节点
+   * @param treeList 
+   * @param node 
+   * @param content 
+   */
+  addNodeOfEdit(treeList: Array<WxTree.TreeNode>,
+    node: WxTree.TreeNode,
+    idInfo: { idType: string | number; idValues: (string | number)[] },
+    treeObjProps: Record<string, any>,
+    editType: string,
+    content: string) {
+
+    for (let i = 0; i < treeList.length; i++) {
+      const current = treeList[i];
+      console.log(current.name);
+      if (current.wxTreeId == node.wxTreeId) {
+        if (editType == "-1") {
+          const newNode: WxTree.TreeNode = {
+            ...node,
+            [treeObjProps.id]: UUID.generateUniqueId(idInfo),
+            wxTreeId: UUID.generateUniqueId(idInfo),
+            [treeObjProps.title]: content,
+            [treeObjProps.fatherId]: treeObjProps.fatherId,
+            isRoot: true
+          }
+          delete newNode[treeObjProps.children]
+
+          treeList.splice(i + 1, 0, newNode)
+        } else {
+
+          current.openChildren = true //展开孩子
+          if (!current[treeObjProps.children]) {
+            current[treeObjProps.children] = []
+          }
+          const newNode: WxTree.TreeNode = {
+            ...node,
+            [treeObjProps.id]: UUID.generateUniqueId(idInfo),
+            wxTreeId: UUID.generateUniqueId(idInfo),
+            [treeObjProps.title]: content,
+            [treeObjProps.fatherId]: treeObjProps.fatherId,
+          }
+          delete newNode[treeObjProps.children]
+          delete newNode.isRoot
+          delete newNode.openChildren
+          current[treeObjProps.children].push(newNode);
+        }
+        return
+
+      }
+
+      if (current[treeObjProps.children]) {
+        this.addNodeOfEdit(current[treeObjProps.children], node, idInfo, treeObjProps, editType, content)
+      }
+    }
+  }
+
+  /**
+   * 从treeList删除某个节点,wxTreeId是对象的唯一标识
+   * @param treeList 
+   * @param node 
+   */
+  delNodeOfEdit(treeList: Array<WxTree.TreeNode>, node: WxTree.TreeNode, fatherNode: WxTree.TreeNode | null, treeObjProps: Record<string, any>) {
+    for (let i = 0; i < treeList.length; i++) {
+      const current = treeList[i]
+      if (current[treeObjProps.id] == node[treeObjProps.id]) {
+        treeList.splice(i, 1)
+        if (fatherNode) {
+          if (fatherNode[treeObjProps.children] && fatherNode[treeObjProps.children].length) {
+
+          } else {
+            delete fatherNode[treeObjProps.children]
+            delete fatherNode.openChildren
+          }
+        }
+        return
+      }
+
+      if (current[treeObjProps.children]) {
+        this.delNodeOfEdit(current[treeObjProps.children], node, current, treeObjProps)
+      }
+    }
+  }
+
+  /**
+   * 修改节点名称
+   * @param treeList 
+   * @param node 
+   * @param treeObjProps 
+   */
+  updateNodeOfEdit(treeList: Array<WxTree.TreeNode>, node: WxTree.TreeNode,
+    treeObjProps: Record<string, any>,
+    content: string
+  ) {
+    for (const current of treeList) {
+      if (current[treeObjProps.id] == node[treeObjProps.id]) {
+        current[treeObjProps.title] = content
+        console.log('find find find Node==>', current, treeObjProps, content)
+        return
+      }
+      if (current[treeObjProps.children]) {
+        this.updateNodeOfEdit(current[treeObjProps.children], node, treeObjProps, content)
+      }
+    }
+  }
+
+  /**
+   * 
+   * @param treeList 
+   * @param node 
+   * @param treeObjProps 
+   */
+  moveNodeOfEdit(treeList: Array<WxTree.TreeNode>,
+    node: WxTree.TreeNode,
+    treeObjProps: Record<string, any>
+  ) {
+    for (let i = 0; i < treeList.length; i++) {
+      const current = treeList[i]
+      if (current[treeObjProps.id] == node[treeObjProps.id]) {
+        
+      }
+    }
   }
 
 

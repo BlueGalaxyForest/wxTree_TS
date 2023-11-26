@@ -296,7 +296,7 @@
 			style="background-color:{{treeItem.isClick?options.clickBg:''}}" bind:tap="nodeClick" mark:item='{{treeItem}}'>{{treeItem[title]}}</view>
 			
 			
-# 现在要做个搜索节点功能
+# 现在要做个搜索节点功能(OK)
 ## 大纲
 * vant的原生微信小程序组件,也用到了setData:
 	        reset: function () {
@@ -558,7 +558,7 @@
 			
 			
 		
-11. 做一下树的编辑模式
+11. 做一下树的编辑模式(OK)
 	* 对于任意一个节点都有 添加,修改节点名称,删除,移动
 	* 添加节点的时候,那么新增的节点需要由唯一的id=> 在搜索节点使用到了,拿取节点的所有祖先需要id比较:
 		find((child: WxTree.TreeNode) => child[idStr] === node[idStr])) {....} && 节点的id本身就该唯一
@@ -568,7 +568,7 @@
 		-> editMode为true,需要看看treeListOrigin是否为空数组[],如果不为空数组说明准备好了
 		-> 要不要判断对象唯一id的类型?如果是number类型使用有序数组?如果使用雪花算法? => 可以在listData监听到id类型存储下来
 		
-	1. 添加模式的实现:
+	1. 添加模式的实现:(OK(
 		* 监听editMode触发方法:=> 不要监听,可以在Verify里面去拦截(OK)
 		* editMode为true的话需要调用editTreeInit,最后list的返回结果可能要改(OK)
 		* 判断id的类型是string是number(OK)
@@ -580,3 +580,91 @@
 			
 		* 现在准备下这个非number类型的id值数据(OK)
 			-> convertTree都有毒了,针对parentId为空串的情况有毒 => 没,因为children是可选的你知道吗? (OK)
+			
+		1. editTreeInit可以返回一个泛型结果:(OK)
+		2. 长按节点绑定方法:(OK)
+		3. longPress应该隔离一份方法(OK)
+		4. 长按的话,肯定需要弹出,所以需要准备图标(OK)
+			-> 新建images文件夹-> (OK)
+		5. 每一颗树能不能拿到编辑模式的字段?=>options.editMode (OK)
+		6. 我要给当前节点左侧展现四个选项图标(OK)
+			-> 引入四个图片于wxml
+		
+		7. 思考一个问题:编辑模式是否需要排他UI显示,如果需要排他的话,要怎么个思路?(OK)
+			* 如果一个节点longpress了,可以this.setData longPressNode:当前长按的节点,longPressNode初始化肯定是为null
+			* 其次,每一个longPress触发,会给一个通知给到rootTree,
+			* rootTree给一个 editAwake ,子组件负责监听editAwake,
+			* 父组件的editAwake可以传递一个editInfo,editInfo有被长按的那个节点,还有一个true
+			* 子组件的本身是不是有treeItem,我通过被长按的节点和treeItem做比较就可以过滤到目标 ,然后把目标的showEditOps设为true
+			
+			1. 父组件层层传递 editAwake(OK)
+			2. longPress向上抛出的条件是 editMode=true(OK)
+			3. nodeLongPress监听到以后,需要setData
+				* const isEmptyObject = obj => JSON.stringify(obj) === '{}';
+		8. 关于点击叉叉,也能让showEditOps变为false	(OK)
+		9. 点击添加按钮,有个致命的缺陷,我当前这个子组件是没有rootTree的,所以我要抛给顶层,因为顶层有当前的treeList(OK)
+		10. 在rootTree,可以拿到当前的treeList吗?=>可以的(OK)
+		11. rootTree的 node Edit也需要switch下(OK)
+		12. 需要再treeUtil里面写个方法: addNodeOfEdit(OK)
+		13. 点击添加按钮,还需要做一个pop层哦:=> 先不需要吧(OK)
+			* 点击添加需要让当前的treeList变高哦=> 需要 editType(ok)
+		14. 添加模式点击确定的逻辑点击确定的逻辑(OK)
+			-> 绑定输入逻辑(OK)
+			
+		15. 如果用户添加模式在输入文本后点击了确定,(OK)
+			* onEdit不要触发,而是点击edit的确定才层层往外面抛出           // this.triggerEvent('nodeEdit', { type, node })
+		16. addNodeOfEdit()函数实现思路:(OK)
+			* 从treeList找到当前node,把当前node的children尾插孩子就行了,当然有没有,children属性判断下,
+			* 其次,需要递归遍历树,这个树的遍历能不能不要使用递归遍历而是使用非递归?=>可以,但是整个项目的风格都是递归风格了
+				-> 还需要传 idstr,titleStr,childrenStr 的相关标识啊
+		17. 点击确定的时候editType也应该设为''(OK)
+		18. 增删改查的图片不应该在添加新节点以后继续存在(OK)
+		19. 先把UUID实现下思路(OK)
+			* TreeUtil应该引入UUID这个类(OK)
+			* generateUniqueId()
+			
+		20. 其次把当前最新的treeList抛出去(OK)
+		21. 我这个增加不能增加root啊(OK)
+			* 可以在editMode增加一个 isRoot 属性(OK)
+			* 节点长按的时候需要多增加一个图片,editType = -1(OK)
+			* 需要复用输入框,那么 editType 需要需要手动获取(OK)
+			* editOperate 的 -1 机制都是一样的
+			
+		22. addNodeOfEdit()需要加个type参数啊(OK)
+		
+12. 编辑模式的删除模式:(OK)
+	* 删完了,五个图片还在的bug是什么鬼?=>一个分支的问题(OK)
+	* 删完之后,如果还有Children属性,判断children数组是否为空了,如果为空数组,还要删掉这个children属性(OK)
+		* 是否要传一个被删除节点的上一层父亲? => 可以多传一个父亲(OK)
+	* 添加子节点模式会给father加上一个openChildren属性,来打开孩子 => delete掉这个属性就行
+	
+13. 现在需要做修改节点模式(OK)
+	* 修改节点的type是2,
+	* 如果点击修改节点,应该先拿到当前的节点名称显示在input输入框里面(OK)
+	* 差不多和新增复用,就是EditType做区分
+	
+# 移动节点的设计
+## 大纲
+* 移动节点的功能你要做成什么效果?
+	1. 功能十分强大的移动方案:	
+		* 点击移动按钮,通知整个树,做一个节点的分隔
+		* 用户如果点击的是分隔本身,那么就把这个节点移动到点击分隔的节点处
+		* 如果用户点击的是节点本身,就把这个节点作为被点节点的一个孩子挂载上去
+		* 用户如果点击的是加号,只做展开操作的事情,展开之后,就能看到可以移动的地方了
+		* 这个方案需要变量控制wxml样式的显示
+		* 根的话,只能向上or 向下移动,根不能乱移动->不满意这个根,你可以删掉
+		
+	2. 功能比较捞的移动方案:
+		* 点击移动按钮,直接默认向上移动,移动到顶端又返回到向下
+		
+* 综合思路:
+	* 点击移动的时候,还需判断当前节点是否有isRoot属性,如果有的话,这个移动只能是默认向下移动,移动到最低端又 转回来
+	* 如果不是根节点,那就要变量配合样式了
+	
+### 实现
+1. 点击移动按钮的逻辑
+	* 找到被移动的节点在treeList的位置,然后再看被找到的节点是不是root=>我觉得根是可以乱移动的(OK)
+	* 点击移动的话,是不是要触发一个全局的moveAwake,全局的moveAwake就要通知样式的改变(OK)
+	* 移动节点的本身会由一个背景色-> 需要一个 markMoveBg = true (OK)
+	* 五张图片把前面四张都隐藏(OK)
+	* 点击叉叉的时候,要关闭 moveMode,markMoveBg
