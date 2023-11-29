@@ -4,7 +4,7 @@
   font-size: 30rpx;
   margin: 15rpx 0;
 
-  // border: 1px solid red;
+ 
 
   .line {
     position: absolute;
@@ -69,10 +69,11 @@
   align-items: center;
 
   .edit-ops {
-    border: 1px solid blue;
+    // border: 1px solid blue;
     display: flex;
     align-items: center;
     margin-left: 10rpx;
+
     .img {
       height: 42rpx;
       width: 42rpx;
@@ -82,12 +83,17 @@
 }
 
 .mark-move-node {
-  background-color: 	#00AAAA !important;
+  background-color: #00AAAA !important;
+  color: #fff;
   padding: 10rpx 0;
 }
 
-.move-mark{
-  color: 	#FF7744;
+.move-mark {
+  color: #FF7744;
+}
+
+.move-mark:last-child {
+  color: #D1BBFF;
 }
 
 .edit-area {
@@ -95,7 +101,7 @@
   padding: 10rpx 0;
 
   .add {
-    border: 1px solid red;
+    // border: 1px solid red;
     display: flex;
     align-items: center;
     padding: 5rpx 42rpx;
@@ -107,7 +113,8 @@
 
     .btn {
       background-color: #00BBFF;
-      padding: 5rpx 10rpx;
+ 
+      padding: 5rpx 18rpx;
       margin: 0 10rpx;
       color: #fff;
       border-radius: 10rpx;

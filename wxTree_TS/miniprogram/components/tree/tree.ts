@@ -46,7 +46,7 @@ Component({
 
   observers: {
     'listData': function (n: Array<WxTree.TreeNode>) {
-      console.log('listData listen->', n, this.properties)
+    
 
       if (n.length) {
         const Verify = new _Verify(this.data.options as WxTree.TreeOptions)
@@ -99,7 +99,7 @@ Component({
     },
 
     nodeLongPress(e: WechatMiniprogram.Touch) {
-      console.log('root tree的nodeLongPress:', e)
+    
       this.setData({
         editAwake: e.detail as WxTree.TreeNode
       })
@@ -113,7 +113,7 @@ Component({
       const treeObjProps: Record<string, any> = this.data.options.treeObjProps
       treeObjProps.children = treeObjProps.children || 'children'
 
-      console.log('root Tree的node Edit 执行--->', type)
+ 
 
 
       switch (type) {
@@ -148,7 +148,7 @@ Component({
           break;
         case "3":
 
-          console.log('root Tree MOVE Node', node, type, treeList, treeObjProps)
+       
 
           // treeUtil.moveNodeOfEdit(treeList,node,treeObjProps)
           this.setData({
@@ -167,6 +167,44 @@ Component({
 
           break;
       }
+    },
+    /**
+     * 具体的要移动的逻辑
+     * @param e 
+     */
+    moveNode(e: WechatMiniprogram.Touch) {
+      const treeList = this.data.treeList
+      const current = this.data.moveAwake //当前节点
+      const target: WxTree.TreeNode = e.detail.target
+      const slot: number = e.detail.slot
+      const move:boolean = e.detail.move //true标识仅仅移动,false标识作为目标节点的子节点
+
+   
+
+      const treeUtil = new TreeUtil()
+      const treeObjProps: Record<string, any> = this.data.options.treeObjProps
+      treeObjProps.children = treeObjProps.children || 'children'
+
+      const exchange = treeUtil._nodeFindTarget(current, target, treeObjProps)
+     
+
+      if (exchange) { //交换节点
+        treeUtil.moveNodeOfExchange(treeList, current, target, slot, {}, treeList, treeObjProps)
+      } else { //非交换节点
+        if(move){
+          
+          treeUtil.moveNodeOfEdit(treeList, current, target, slot, null, treeList, treeObjProps)
+        }else{
+     
+          treeUtil.moveNodeforChildren(treeList,current,target,null,treeList,treeObjProps)
+        }
+      }
+
+      this.setData({
+        treeList,
+        moveAwake: {}
+      })
+      this.triggerEvent('nodeEditResult', treeList)
     },
     /**
      * 具体开启点击印记的逻辑:

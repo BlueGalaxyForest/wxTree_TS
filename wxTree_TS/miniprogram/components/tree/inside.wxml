@@ -15,7 +15,7 @@
       <view class="icon" wx:else mark:item='{{treeItem}}' catchtap="toggleShowChildren">+</view>
 
       <view class="node-box-outer">
-        <view class="move-mark" wx:if="{{moveMode}}">------------------->移动到此处</view>
+        <view class="move-mark" wx:if="{{moveMode}}" bind:tap="onMoveClick" mark:type="0">------------------->移动到此处</view>
         <view class="node-box">
           <view class="text {{treeItem.isClick?'click-active':''}} {{treeItem.isFound?'found-active':''}} {{markMoveBg?'mark-move-node':''}}" style="background-color:{{treeItem.isClick?options.clickBg:''}} {{treeItem.isFound?options.searchBg:''}}" bind:longpress="nodeLongPress" bind:tap="nodeClick" mark:item='{{treeItem}}'>{{treeItem[title]}}</view>
           <view class="edit-ops" wx:if="{{showEditOps}}">
@@ -27,7 +27,7 @@
             <image  class="img" bind:tap="onEdit" mark:type="4" src="./images/cancel.png"></image>
           </view>
         </view>
-        <view class="move-mark" wx:if="{{moveMode}}">------------------->移动到此处</view>
+        <view class="move-mark" wx:if="{{moveMode}}" bind:tap="onMoveClick" mark:type="1">------------------->移动到此处</view>
 
 
       </view>
@@ -40,8 +40,8 @@
     <view class="edit-area" wx:if="{{editType !=''}}">
       <view class="add" wx:if="{{editType=='-1' || editType=='0' || editType=='2'}}">
         <input type="text" class="input" value="{{editInputText}}" bind:input="onEditInput" mark:editType="0" placeholder="{{placeholder}}" />
-        <view class="btn confirm" bind:tap="editOperate" mark:editType="0" mark:operType="0">确定</view>
-        <view class="btn cancel" bind:tap="editOperate" mark:editType="0" mark:operType="1">取消</view>
+        <view class="btn confirm" bind:tap="editOperate" mark:editType="0" mark:operType="0">√</view>
+        <view class="btn cancel" bind:tap="editOperate" mark:editType="0" mark:operType="1">×</view>
       </view>
     </view>
 
@@ -54,13 +54,17 @@
 
   <block wx:if="{{keepAlive}}">
     <view hidden="{{(isShowChildren===false || treeItem[children].length<=0) && !treeItem.openChildren}}" wx:for="{{treeItem[children]}}" wx:key="index">
-      <tree treeItem="{{item}}" flatExpand="{{flatExpand}}" moveAwake="{{moveAwake}}" editAwake="{{editAwake}}" searchAwake="{{searchAwake}}" options="{{options}}" keepAlive="{{keepAlive}}" step="{{step+1}}" bind:nodeLongPress="nodeLongPress" bind:nodeEdit="nodeEdit" bind:nodeClick='nodeClick'></tree>
+      <tree treeItem="{{item}}" flatExpand="{{flatExpand}}" moveAwake="{{moveAwake}}" editAwake="{{editAwake}}" searchAwake="{{searchAwake}}" options="{{options}}" keepAlive="{{keepAlive}}" step="{{step+1}}" bind:nodeLongPress="nodeLongPress" 
+      bind:moveNode="moveNode"
+      bind:nodeEdit="nodeEdit" bind:nodeClick='nodeClick'></tree>
     </view>
   </block>
 
   <block wx:else>
     <view wx:if="{{(treeItem[children].length>0&&isShowChildren) || treeItem.openChildren}}" wx:for="{{treeItem[children]}}" wx:key="index">
-      <tree treeItem="{{item}}" flatExpand="{{flatExpand}}" moveAwake="{{moveAwake}}" editAwake="{{editAwake}}" searchAwake="{{searchAwake}}" options="{{options}}" keepAlive="{{keepAlive}}" step="{{step+1}}" bind:nodeLongPress="nodeLongPress" bind:nodeEdit="nodeEdit" bind:nodeClick='nodeClick'></tree>
+      <tree treeItem="{{item}}" flatExpand="{{flatExpand}}" moveAwake="{{moveAwake}}" editAwake="{{editAwake}}" searchAwake="{{searchAwake}}" options="{{options}}" keepAlive="{{keepAlive}}" step="{{step+1}}" bind:nodeLongPress="nodeLongPress"
+       bind:moveNode="moveNode"
+       bind:nodeEdit="nodeEdit" bind:nodeClick='nodeClick'></tree>
     </view>
   </block>
 

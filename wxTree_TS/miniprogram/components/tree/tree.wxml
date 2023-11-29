@@ -6,7 +6,8 @@
     <tree treeItem="{{item}}" options="{{options}}" isShowChildren="{{isShowChildren}}" flatExpand="{{flatExpand}}" keepAlive="{{keepAlive}}" searchAwake="{{searchAwake}}"
     moveAwake="{{moveAwake}}"
      editAwake="{{editAwake}}" step="1" bind:nodeLongPress="nodeLongPress"
-    bind:nodeEdit="nodeEdit"
+     bind:moveNode="moveNode"
+     bind:nodeEdit="nodeEdit"
      bind:nodeClick="nodeClick"></tree>
   </block>
 </view>

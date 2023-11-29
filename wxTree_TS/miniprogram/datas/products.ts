@@ -20,6 +20,11 @@ const productList: Product[] = [
     parentId: 'ksf'
   },
   {
+    id: 'ksf3',
+    name: '阿沙姆奶茶',
+    parentId: 'ksf'
+  },
+  {
     id: 'wl',
     name: '卫龙',
     parentId: ''
@@ -30,10 +35,16 @@ const productList: Product[] = [
     parentId: 'wl'
   },
   {
+    id:'xl',
+    name:'香辣亲嘴嘴',
+    parentId:'wl1'
+  },
+  {
     id: 'wl2',
     name: '魔芋爽',
     parentId: 'wl'
   }
+ 
 ]
 
 export default productList

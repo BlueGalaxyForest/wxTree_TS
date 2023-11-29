@@ -70,10 +70,10 @@ Page({
    */
   nodeClick(e: WechatMiniprogram.Touch) {
     const node = e.detail
-    console.log('选择的节点:', node)
+    console.log('page choose node:', node)
   },
 
   nodeEditResult(e: WechatMiniprogram.Touch) {
-    console.log('page get Edit result', e.detail)
+    console.log('page get Edit result:', e.detail)
   }
 })

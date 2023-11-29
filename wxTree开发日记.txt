@@ -643,7 +643,7 @@
 	* 如果点击修改节点,应该先拿到当前的节点名称显示在input输入框里面(OK)
 	* 差不多和新增复用,就是EditType做区分
 	
-# 移动节点的设计
+# 移动节点的设计(OK)
 ## 大纲
 * 移动节点的功能你要做成什么效果?
 	1. 功能十分强大的移动方案:	
@@ -660,11 +660,103 @@
 * 综合思路:
 	* 点击移动的时候,还需判断当前节点是否有isRoot属性,如果有的话,这个移动只能是默认向下移动,移动到最低端又 转回来
 	* 如果不是根节点,那就要变量配合样式了
+	* 如果一个节点往下移动,移动到自己的孩子下面,那么就要根儿互换了  ----------> 这个功能是比较靠谱的功能了(OK)
 	
 ### 实现
-1. 点击移动按钮的逻辑
+1. 点击移动按钮的逻辑(OK)
 	* 找到被移动的节点在treeList的位置,然后再看被找到的节点是不是root=>我觉得根是可以乱移动的(OK)
 	* 点击移动的话,是不是要触发一个全局的moveAwake,全局的moveAwake就要通知样式的改变(OK)
 	* 移动节点的本身会由一个背景色-> 需要一个 markMoveBg = true (OK)
 	* 五张图片把前面四张都隐藏(OK)
-	* 点击叉叉的时候,要关闭 moveMode,markMoveBg
+	* 点击叉叉的时候,要关闭 moveMode,markMoveBg(ok)
+	
+2. 现在需要点击移动到此处的逻辑:
+	* 移动到此处,要分type类型去移动;(OK)
+	* 移动模式开启的时候,节点点击将会不再生效,把控制权交给toggle就行了(OK)
+	* 点击到移动文本的时候,需要单独触发一个事件吗?因为已经没有处于case当中,=>重新触发一个事件比较好(OK)
+	* 我可以拿到targetNode的位置,那么我能拿到currentNode吗? => moveNode可以在rootTree拿到,rootTree可以保存moveNode:(OK)
+		-> moveAwake承担着唤醒功能和保存功能:
+		        this.setData({
+            moveAwake: node
+          })
+	* 那我需要触发一个moveNode事件(OK)
+	@ 现在有个bug:就是多次长按移动,会有一个印记多次的bug => 和searchAwake差不多(OK)
+	1. TreeUtil是不是要写个方法? =>是的
+		* 首先我能拿到的数据是rootTreeList,current,target,slot
+		* 我可以先找到target节点,找到以后,先比较target和current的关系=>因为我这个移动是顺便移动的,如果target的辈分属于current,那么移动的结果是两个节点交换位置
+		* 如果我的target辈分不属于current,我肯定需要一个中间变量,然后读取slot的值,把current先安排好,然后再把current从当前位置删除掉
+		* 如果current和slot相同,直接return结束就行(OK)
+	2. 	在正式moveNodeOfEdit之前,我需要确定current和target的关系,我current有没有target这个孩子,如果有的话,exchange:true,否则的话exchange:false (ok)
+	3. 两个节点交换位置如何设计?
+		* 我拿目标节点在树里面匹配倒了,但是此时很尴尬,node[treeObjProps.id]没有父亲节点支撑
+		* 所以说这个函数还要传一个父父亲节点=>父亲节点用来引用改变的(OK)
+		* 移动的时候,还需要考虑下slot,slot只有0,1 两个取值
+		* exchange模式,把children也给带过去了=>如果说current还有children的话,children只能先去掉(OK)
+		* 我还需要去写个 _exchangeNode 方法 => 整个rootTree还要接着传,=>current肯定会出现两个,但是一定不会找错到后面那个(OK)
+		* @完了,卫龙和亲嘴骚换了以后,清嘴骚的孩子不见了=>加个判断就行了(OK)
+		
+	4. 两个节点非交换该如何设计?(OK)
+		* treeList里面肯定会有current,也会有target
+		* treeList可以先去找current,treeList找到current的时候,当前treeList的node也知道了,可以先让treeList自行自宫=>treeList是不是就少了节点了=> splice(
+		* 在剩余的treeList里面再去找target的位置,此时treeList又会有一个node,感觉还是需要一下这个fatherNode(应该是target的fatherNode)
+			-> 如果fatherNode为null,就用rootTreeList,不为null就用fatherNode.children
+			-> node出来了以后,这个i也出来了;例如i=0;slot = 0 || 1; insertIndex = i+slot
+			
+		1. 感觉要新写一个级别比较高的方法了,那exchange作为外层区分了啊	(OK)
+		2. 然后需要找target的位置
+		3. splice自宫以后,如果children数组的的长度为0,那么这个children属性也要删掉(OK)
+		
+		
+		
+# 感觉缺少了一个,current节点作为target节点的一个孩子的功能:(OK)
+## 大纲
+* 如果说要做一个移动到一个节点,作为一个儿子的功能,要不要复用当前的逻辑呢?
+* 当前的移动主要就是简单的交换位置+删除插入的方式	
+* 如果我在移动模式,点击节点本身,是否要触发这个,作为儿子的效果呢?
+* 并且有个问题比较棘手,长辈往下移动=>还是和当前一样采取交换策略算了
+* 那么还是要判断是否要Exchange
+
+* 当前移动触发的信息:
+    onMoveClick(e: WechatMiniprogram.Touch) {
+      console.log('TreeItem->', this.data.treeItem)
+      console.log('onMoveClick-->', e.mark?.type)
+      const target: WxTree.TreeNode = this.data.treeItem
+      const slot: number = (Number)(e.mark?.type)
+      this.triggerEvent('moveNode', {
+        target,
+        slot -----------> 这里可以传额外的标志,也可以说我判断slot属性作为唯一的标志
+      })
+    },
+	
+### 实现
+1. 给移动箭头区分颜色(OK)
+2. 移动模式,传递flag标志(OK)
+		      this.triggerEvent('moveNode', {
+				target,
+				slot,
+				move:true
+			  })
+			  ----
+		this.triggerEvent('moveNode', {
+          target: e.mark?.item,
+          move: false
+        })
+		
+3. 那么需要写新的方法了
+	* 因为无论是向下移动,还是向下子节点,都是统一交换节点,而非Exchange,才作为区分移动还是作为目标的儿子
+	* 我能拿到当前current和target节点
+	* 我还能拿到treeList
+	* treeList可以找,先找current,treeList找到current之后,需要treeList自己先自宫,自宫的话还是需要fatherNode
+	* treeList自宫完以后,还需要去找target,此时treeList可以拿到一个node,如果这个node没有Children,我就给他加个Children属性,总而言之,让这个node强行挂载current
+	
+	* 方法:
+	  moveNodeforChildren(
+    treeList: WxTree.TreeNode[],
+    current: WxTree.TreeNode,
+    target: WxTree.TreeNode,
+    fatherNode: WxTree.TreeNode | null,
+    rootTreeList: WxTree.TreeNode[],
+    treeObjProps: Record<string, any>
+  )
+
+4. 被自宫的treeList如果children的length等于0,也要去delete children属性  

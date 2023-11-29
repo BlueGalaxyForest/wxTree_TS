@@ -113,21 +113,29 @@ Component({
     },
 
     'moveAwake': function (n: WxTree.TreeNode) {
-      console.log('son moveAwake ...', n)
+      
       if (JSON.stringify(n) != '{}') {
+
+
         let markMoveBg = this.data.markMoveBg
         const treeItem = this.data.treeItem
 
         if (n[this.data.id] == treeItem[this.data.id]) {
           markMoveBg = true
+        } else {
+          markMoveBg = false
         }
         this.setData({
           moveMode: true,
           markMoveBg
         })
+
+
       } else {
         this.setData({
-          moveMode: false
+          moveMode: false,
+          markMoveBg: false,
+          showEditOps: false
         })
       }
 
@@ -177,6 +185,14 @@ Component({
      * @param e 
      */
     nodeClick(e: WechatMiniprogram.Touch): void {
+      if (this.data.moveMode) {
+        this.triggerEvent('moveNode', {
+          target: e.mark?.item,
+          move: false
+        })
+        return //移动模式,点击节点,将会把current作为target的儿子
+      }
+
       let node: Record<string, any>
       const flatExpand = this.data.flatExpand
 
@@ -229,7 +245,7 @@ Component({
       const node = this.data.treeItem
       const editInputText = this.data.editInputText
 
-      console.log('type-->', type)
+   
       switch (type) {
         case "-1":
 
@@ -251,7 +267,7 @@ Component({
 
           break;
         case "1":
-          console.log('son del')
+    
           this.triggerEvent('nodeEdit', { type, node })
           break;
         case "2":
@@ -268,7 +284,7 @@ Component({
           break;
         case "4":
           if (this.data.markMoveBg) {
-            console.log('EditType==4,this.data.markMoveBg==',this.data.markMoveBg,type)
+            console.log('EditType==4,this.data.markMoveBg==', this.data.markMoveBg, type)
             this.triggerEvent('nodeEdit', { type, markMoveBg: true })
           }
           this.setData({
@@ -280,12 +296,12 @@ Component({
       }
     },
     nodeEdit(e: WechatMiniprogram.Touch) {
-      console.log('node Edit--->', e)
+      
       this.triggerEvent('nodeEdit', e.detail)
     },
 
     editOperate(e: WechatMiniprogram.Touch) {
-      console.log('editOperate->', e, this.data.editType)
+    
       const editType = this.data.editType
       const operType = e.mark?.operType
       const editInputText = this.data.editInputText
@@ -324,12 +340,30 @@ Component({
 
     },
     onEditInput(e: WechatMiniprogram.TextareaInput) {
-      console.log('this.data.editType-->', this.data.editType)
-
-
+     
       this.setData({
         editInputText: e.detail.value.trim()
       })
+    },
+
+    /**
+     * 点击移动到某处
+     * @param e 
+     */
+    onMoveClick(e: WechatMiniprogram.Touch) {
+  
+ 
+      const target: WxTree.TreeNode = this.data.treeItem
+      const slot: number = (Number)(e.mark?.type)
+      this.triggerEvent('moveNode', {
+        target,
+        slot,
+        move: true
+      })
+    },
+
+    moveNode(e: WechatMiniprogram.Touch) {
+      this.triggerEvent('moveNode', e.detail)
     }
   }
 })
