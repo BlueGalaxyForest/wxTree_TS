@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "wxTree": "../../../components/tree/tree"
+  },
+  "navigationBarTitleText": "展示"
+}

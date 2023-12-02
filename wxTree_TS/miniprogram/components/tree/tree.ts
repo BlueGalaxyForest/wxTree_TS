@@ -46,7 +46,7 @@ Component({
 
   observers: {
     'listData': function (n: Array<WxTree.TreeNode>) {
-    
+
 
       if (n.length) {
         const Verify = new _Verify(this.data.options as WxTree.TreeOptions)
@@ -99,7 +99,7 @@ Component({
     },
 
     nodeLongPress(e: WechatMiniprogram.Touch) {
-    
+
       this.setData({
         editAwake: e.detail as WxTree.TreeNode
       })
@@ -113,7 +113,7 @@ Component({
       const treeObjProps: Record<string, any> = this.data.options.treeObjProps
       treeObjProps.children = treeObjProps.children || 'children'
 
- 
+
 
 
       switch (type) {
@@ -122,7 +122,17 @@ Component({
         case "-1": //root级别添加
         case "0": //孩子级别添加
           const text = e.detail.text //输入的文本
+          const idInfo = this.data.idInfo
           treeUtil.addNodeOfEdit(treeList, node, idInfo, treeObjProps, type, text)
+          if (idInfo.idType === 'number') {
+            const idValues: number[] = idInfo.idValues as number[]
+            idValues.push(idValues[idValues.length - 1] + 1)
+            idInfo.idValues = idValues
+            this.setData({
+              idInfo
+            })
+          }
+         
           this.setData({
             treeList,
             editAwake: {}
@@ -148,7 +158,7 @@ Component({
           break;
         case "3":
 
-       
+
 
           // treeUtil.moveNodeOfEdit(treeList,node,treeObjProps)
           this.setData({
@@ -177,26 +187,26 @@ Component({
       const current = this.data.moveAwake //当前节点
       const target: WxTree.TreeNode = e.detail.target
       const slot: number = e.detail.slot
-      const move:boolean = e.detail.move //true标识仅仅移动,false标识作为目标节点的子节点
+      const move: boolean = e.detail.move //true标识仅仅移动,false标识作为目标节点的子节点
 
-   
+
 
       const treeUtil = new TreeUtil()
       const treeObjProps: Record<string, any> = this.data.options.treeObjProps
       treeObjProps.children = treeObjProps.children || 'children'
 
       const exchange = treeUtil._nodeFindTarget(current, target, treeObjProps)
-     
+
 
       if (exchange) { //交换节点
         treeUtil.moveNodeOfExchange(treeList, current, target, slot, {}, treeList, treeObjProps)
       } else { //非交换节点
-        if(move){
-          
+        if (move) {
+
           treeUtil.moveNodeOfEdit(treeList, current, target, slot, null, treeList, treeObjProps)
-        }else{
-     
-          treeUtil.moveNodeforChildren(treeList,current,target,null,treeList,treeObjProps)
+        } else {
+
+          treeUtil.moveNodeforChildren(treeList, current, target, null, treeList, treeObjProps)
         }
       }
 

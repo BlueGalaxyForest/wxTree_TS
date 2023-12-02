@@ -1,0 +1,1 @@
+<wxTree listData="{{movieList}}" options="{{treeOptions}}" bind:nodeClick="nodeClick"></wxTree>

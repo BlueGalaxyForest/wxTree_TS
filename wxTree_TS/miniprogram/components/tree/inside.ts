@@ -77,7 +77,7 @@ Component({
 
       const treeItem: WxTree.TreeNode = this.data.treeItem
       const isShowChildren = this.data.isShowChildren
-      console.log('searchAwake->', n, treeItem, isShowChildren)
+ 
       if (isShowChildren && !treeItem.hidden && treeItem[this.data.children]) {
 
         this.setData({

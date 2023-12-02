@@ -760,3 +760,10 @@
   )
 
 4. 被自宫的treeList如果children的length等于0,也要去delete children属性  
+
+
+# @每次添加新节点,WeTree在第二次添加以后,id会重复的问题 (OK)
+## 大纲
+* 数字版id会重复
+* 但是字符串的id不会重复=> 
+	* 主要是增加了节点,没有重新计算idInfo,导致value一直是旧的

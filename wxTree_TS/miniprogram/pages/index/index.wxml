@@ -1,16 +1,6 @@
 <view class="main">
+  <button bind:tap="toDetail" mark:item="0">展示数据</button>
+  <button bind:tap="toDetail" mark:item="1">搜索数据</button>
+  <button bind:tap="toDetail" mark:item="2">编辑数据</button>
 
-  <!-- <view class="tree-box">
-    <wxTree listData="{{movieList}}" options="{{treeOptions}}" bind:nodeClick="nodeClick"></wxTree>
-  </view> -->
-
-  <!-- <view class="tree-box">
-    <wxTree listData="{{cityTree}}" options="{{treeOptions2}}" bind:nodeClick="nodeClick"></wxTree>
-  </view> -->
-
-  <view class="tree-box">
-    <wxTree listData="{{productList}}" options="{{treeOptions3}}" 
-    bind:nodeEditResult="nodeEditResult"
-    bind:nodeClick="nodeClick"></wxTree>
-  </view>
 </view>

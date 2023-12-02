@@ -149,7 +149,7 @@ class TreeUtil {
       results.push(node)
 
       const Ancestors = this.getAncestors(originTree, node, idStr, childrenStr)
-      console.log('Ancestors-->', Ancestors)
+ 
       Ancestors.forEach((item) => {
         item.openChildren = true
         item.hidden = false

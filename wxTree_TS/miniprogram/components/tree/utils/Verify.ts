@@ -72,7 +72,7 @@ class Verify {
 
 
     if (idType === "number") {
-      idValues.sort((a, b) => (a as number) - (b as number)); //这里报错了怎么办啊?参数“a”和“a” 的类型不兼容。不能将类型“string | number”分配给类型“number”。不能将类型“string”分配给类型“number”。ts(2345)
+      idValues.sort((a, b) => (a as number) - (b as number));
     }
 
 
